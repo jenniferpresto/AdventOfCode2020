@@ -15,17 +15,16 @@ namespace AdventCode
         public void calculate()
         {
             Console.WriteLine($"This many data points: {data.Count}");
-
             for (int i = 0; i < data.Count; i++)
             {
-                for (int j = i; j < data.Count; j++)
+                for (int j = i + 1; j < data.Count; j++)
                 {
                     if (data[i] + data[j] == 2020)
                     {
                         Console.WriteLine($"Found it!: {data[i]} + {data[j]} at points {i} and {j}");
                         Console.WriteLine($"Product is: {data[i] * data[j]}");
                     }
-                    for (int k = j; k < data.Count; k++)
+                    for (int k = j + 1; k < data.Count; k++)
                     {
                         if (data[i] + data[j] + data[k] == 2020)
                         {

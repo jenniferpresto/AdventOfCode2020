@@ -8,7 +8,6 @@ namespace AdventCode
     {
         static void Main(string[] args)
         {
-            // AskForName();
             List<int> data1 = ReadIntData("./data/adventData_01.csv");
             var day1 = new Day01(data1);
             day1.calculate();
@@ -22,15 +21,6 @@ namespace AdventCode
             day3.calculate();
 
             Console.Write("\nDone");
-            // Console.ReadKey(true);
-        }
-
-        static void AskForName()
-        {
-            Console.WriteLine("What is your name?");
-            var name = Console.ReadLine();
-            var date = DateTime.Now;
-            Console.WriteLine($"Hello {name}, on {date:d} at {date:t}!");
         }
 
         static List<int> ReadIntData(string pathname)

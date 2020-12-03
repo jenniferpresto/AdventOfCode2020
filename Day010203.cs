@@ -14,16 +14,12 @@ namespace AdventCode
 
         public void calculate()
         {
-            // foreach (int number in data) {
-            //     Console.WriteLine(number);
-            // }
             Console.WriteLine($"This many data points: {data.Count}");
 
             for (int i = 0; i < data.Count; i++)
             {
                 for (int j = i; j < data.Count; j++)
                 {
-                    // Console.WriteLine($"Total: {data[i] + data[j]}");
                     if (data[i] + data[j] == 2020)
                     {
                         Console.WriteLine($"Found it!: {data[i]} + {data[j]} at points {i} and {j}");
@@ -68,10 +64,9 @@ namespace AdventCode
                 string keySubstring = password.Substring(spacePos + 1, 1);
                 string passwordSubstring = password.Substring(spacePos + 4);
 
-                // Console.WriteLine(passwordSubstring);
                 int numMatches = 0;
-                //  iterate through password substring and check for matches
                 //  first password policy
+                //  iterate through password substring and check for matches
                 // foreach (char c in passwordSubstring) {
                 //     if (c == char.Parse(keySubstring)) {
                 //         numMatches++;
@@ -107,7 +102,7 @@ namespace AdventCode
 
                 if (numMatches == 1)
                 {
-                    Console.WriteLine($"Valid password on line {csvLine}");
+                    // Console.WriteLine($"Valid password on line {csvLine}");
                     numValidPasswords++;
                 }
 
@@ -139,26 +134,6 @@ namespace AdventCode
 
             uint product = slope1 * slope2 * slope3 * slope4 * slope5;
             Console.WriteLine($"Final product: {product}");
-            // foreach (string pattern in data) {
-            //     //  skip first line
-            //     if (first) {
-            //         first = false;
-            //         continue;
-            //     }
-            //     index += 3;
-            //     if (index > pattern.Length - 1) {
-            //         int priorIndex = index;
-            //         index = priorIndex % pattern.Length;
-            //         Console.WriteLine($"Index was {priorIndex}, new is {index}; length is {pattern.Length}");
-            //     }
-            //     if (pattern[index] == '#') {
-            //         Console.WriteLine($"It's a tree!, Line {csvLine}, index {index}");
-            //         numTrees++;
-            //     }
-            //     csvLine++;
-            // }
-            // Console.WriteLine($"Total trees: {numTrees}");
-
         }
 
         private uint goDownSlope(int right, int down)
@@ -183,11 +158,10 @@ namespace AdventCode
                 {
                     int priorIndex = charIndex;
                     charIndex = priorIndex - pattern.Length;
-                    // Console.WriteLine($"It's a tree!, Line {csvLine}, index {charIndex}");
                 }
                 csvLine++;
             }
-            Console.WriteLine($"Total trees: {numTrees}");
+            // Console.WriteLine($"Total trees: {numTrees}");
             return numTrees;
         }
     }

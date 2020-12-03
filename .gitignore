@@ -1,0 +1,7 @@
+# BUilds
+bin/
+obj/
+
+# data
+*.csv
+

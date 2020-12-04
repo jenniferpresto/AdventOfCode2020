@@ -22,37 +22,26 @@ class Day04
         int numPassports = 0;
         Console.WriteLine($"This many lines: {numLines}");
 
+        //  add a blank line at the end of the data
+        if (data[data.Count - 1].Length > 0)
+        {
+            data.Add("");
+        }
+
         //  create one string for each passport
         List<string> allPassportStrings = new List<string>();
         string fullPassportString = "";
-        bool isFirst = true;
-        for (int i = 0; i < data.Count; i++)
+        foreach (string line in data)
         {
-            //  end of passport
-            if (data[i].Length == 0 || i == data.Count - 1)
+            if (line.Length > 0)
             {
-                allPassportStrings.Add(fullPassportString);
-                if (i == data.Count - 1)
-                {
-                    fullPassportString += " " + data[i];
-                }
-                Console.WriteLine($"{i}: {fullPassportString}");
-                numPassports++;
-                fullPassportString = "";
-                isFirst = true;
+                fullPassportString += line + " ";
             }
-            //  concatnate passport into one string
             else
             {
-                if (isFirst)
-                {
-                    fullPassportString += data[i];
-                    isFirst = false;
-                }
-                else
-                {
-                    fullPassportString += " " + data[i];
-                }
+                allPassportStrings.Add(fullPassportString);
+                fullPassportString = "";
+                numPassports++;
             }
         }
 
@@ -72,38 +61,39 @@ class Day04
         bool onKey = true;
         string key = "";
         string value = "";
-        for (int i = 0; i < passportString.Length; i++)
+        foreach (char c in passportString)
         {
             if (onKey)
             {
-                if (passportString[i] == ':')
+                if (c == ':')
                 {
                     onKey = false;
                 }
                 else
                 {
-                    key += passportString[i];
+                    key += c;
                 }
             }
             else
             {
-                if (passportString[i] == ' ' || i > passportString.Length)
+                if (c == ' ')
                 {
-                    onKey = true;
                     passportObj.Add(key, value);
                     key = "";
                     value = "";
+                    onKey = true;
                 }
                 else
                 {
-                    value += passportString[i];
+                    value += c;
                 }
             }
         }
-        foreach (KeyValuePair<string, string> kvp in passportObj)
-        {
-            Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
-        }
+        // Console.WriteLine("***********Passport");
+        // foreach (KeyValuePair<string, string> kvp in passportObj)
+        // {
+        //     Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
+        // }
         return passportObj;
     }
 }

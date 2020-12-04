@@ -12,6 +12,25 @@ class Day04
     public void calculate()
     {
         var passportList = parseData();
+        int numValid = 0;
+        foreach (Dictionary<string, string> passport in passportList)
+        {
+            numValid += isPassportValid(passport) ? 1 : 0;
+            if (isPassportValid(passport))
+            {
+                Console.WriteLine("VALID");
+                if (passport.Count == 7)
+                {
+                    Console.WriteLine("Elf passport!!");
+                }
+            }
+            else
+            {
+                Console.WriteLine("INVALID");
+            }
+            printPassport(passport);
+        }
+        Console.WriteLine($"Valid passports: {numValid}");
 
     }
 
@@ -89,11 +108,30 @@ class Day04
                 }
             }
         }
-        // Console.WriteLine("***********Passport");
-        // foreach (KeyValuePair<string, string> kvp in passportObj)
-        // {
-        //     Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
-        // }
         return passportObj;
+    }
+
+    private bool isPassportValid(Dictionary<string, string> passportObj)
+    {
+        if (passportObj.Count == 8)
+        {
+            return true;
+        }
+
+        if (passportObj.Count == 7 && !passportObj.ContainsKey("cid"))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    //  for debugging
+    private void printPassport(Dictionary<string, string> passportObj)
+    {
+        Console.WriteLine("***********Passport");
+        foreach (KeyValuePair<string, string> kvp in passportObj)
+        {
+            Console.WriteLine($"\tKey: {kvp.Key}, Value: {kvp.Value}");
+        }
     }
 }

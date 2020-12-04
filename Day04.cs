@@ -25,24 +25,35 @@ class Day04
         //  create one string for each passport
         List<string> allPassportStrings = new List<string>();
         string fullPassportString = "";
-        foreach (string line in data)
+        bool isFirst = true;
+        for (int i = 0; i < data.Count; i++)
         {
-            if (line.Length == 0)
+            //  end of passport
+            if (data[i].Length == 0 || i == data.Count - 1)
             {
                 allPassportStrings.Add(fullPassportString);
+                if (i == data.Count - 1)
+                {
+                    fullPassportString += " " + data[i];
+                }
+                Console.WriteLine($"{i}: {fullPassportString}");
                 numPassports++;
                 fullPassportString = "";
+                isFirst = true;
             }
+            //  concatnate passport into one string
             else
             {
-                fullPassportString += line;
+                if (isFirst)
+                {
+                    fullPassportString += data[i];
+                    isFirst = false;
+                }
+                else
+                {
+                    fullPassportString += " " + data[i];
+                }
             }
-        }
-        //  make sure there are no lingering lines
-        //  (happens if last line not empty)
-        if (fullPassportString.Length > 0)
-        {
-            allPassportStrings.Add(fullPassportString);
         }
 
         //  parse each full string to create dictionary objects
@@ -61,37 +72,37 @@ class Day04
         bool onKey = true;
         string key = "";
         string value = "";
-        foreach (char c in passportString)
+        for (int i = 0; i < passportString.Length; i++)
         {
             if (onKey)
             {
-                if (c != ':')
+                if (passportString[i] == ':')
                 {
-                    key += c;
+                    onKey = false;
                 }
                 else
                 {
-                    onKey = false;
+                    key += passportString[i];
                 }
             }
             else
             {
-                if (c != ' ')
-                {
-                    value += c;
-                }
-                else
+                if (passportString[i] == ' ' || i > passportString.Length)
                 {
                     onKey = true;
                     passportObj.Add(key, value);
                     key = "";
                     value = "";
                 }
+                else
+                {
+                    value += passportString[i];
+                }
             }
         }
-        if (key.Length > 0 || value.Length > 0)
+        foreach (KeyValuePair<string, string> kvp in passportObj)
         {
-            passportObj.Add(key, value);
+            Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
         }
         return passportObj;
     }

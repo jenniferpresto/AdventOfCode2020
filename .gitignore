@@ -1,7 +1,8 @@
 # BUilds
 bin/
 obj/
+.vs/
 
 # data
 *.csv
-
+*.txt

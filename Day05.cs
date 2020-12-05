@@ -40,17 +40,20 @@ class Day05
         // Console.WriteLine($"Full boarding pass: {pass}");
         string rowStr = pass.Substring(0, 7);
         string colStr = pass.Substring(7);
-        int seat = parseBinary(rowStr, 'F', 'B') * 8 + parseBinary(colStr, 'L', 'R');
+        int seat = parseBinary(rowStr, 'B') * 8 + parseBinary(colStr, 'R');
         return seat;
     }
 
-    private int parseBinary(string unit, char zero, char one)
+    private int parseBinary(string unit, char one)
     {
-        string binaryStr = "";
-        foreach (char c in unit)
+        int result = 0;
+        for (int i = unit.Length; i > 0; i--)
         {
-            binaryStr += c == zero ? "0" : "1";
+            if (unit[i - 1] == one)
+            {
+                result += Convert.ToInt32((Math.Pow(2, unit.Length - i)));
+            }
         }
-        return Convert.ToInt32(binaryStr, 2);
+        return result;
     }
 }

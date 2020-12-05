@@ -25,7 +25,7 @@ class Day05
     {
         Console.WriteLine($"Full boarding pass: {pass}");
         int seat = 0;
-        string rowStr = pass.Substring(0, 6);
+        string rowStr = pass.Substring(0, 7);
         string colStr = pass.Substring(7);
         int row = parseRow(rowStr);
         int col = parseColumn(colStr);
@@ -36,29 +36,32 @@ class Day05
 
     private int parseRow(string passRow)
     {
-        parseUnit(passRow, 'F', 'B', 0, 127);
-        return 0;
+        return parseUnit(passRow, 'F', 'B', 0, 127);
     }
 
     private int parseColumn(string passCol)
     {
-        parseUnit(passCol, 'L', 'R', 0, 8);
-        return 0;
+        return parseUnit(passCol, 'L', 'R', 0, 8);
     }
 
     private int parseUnit(string unit, char lowerChar, char upperChar, int lower, int upper)
     {
-        decimal average = (upper + lower) / 2;
-        int midway = Convert.ToInt32(Math.Floor(average));
+        Console.WriteLine($"{unit} -- lower: {lower}, upper: {upper}");
 
-        if (unit.Length == 1)
+        //  Final stage
+        if (unit.Length == 0)
         {
-            string type = lowerChar == 'F' ? "row" : "col";
-            Console.WriteLine($"We're done! {type} {lower} {upper} {midway}");
-            return midway;
+            if (upper != lower)
+            {
+                Console.WriteLine("Problem with parsing! Indices don't match!");
+            }
+            // string type = lowerChar == 'F' ? "row" : "col";
+            // Console.WriteLine($"We're done! {type} {lower} {upper}");
+            return lower;
         }
 
-
+        decimal average = (upper + lower) / 2;
+        int midway = Convert.ToInt32(Math.Floor(average));
         if (unit[0] == lowerChar)
         {
             return parseUnit(unit.Substring(1), lowerChar, upperChar, lower, midway);

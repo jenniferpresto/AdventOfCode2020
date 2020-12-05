@@ -12,6 +12,8 @@ class Day05
     public void calculate()
     {
         int highestSeat = 0;
+        int lowestSeat = 1023;
+        List<int> allSeats = new List<int>();
         for (int i = 0; i < data.Count; i++)
         {
             int seat = parsePass(data[i]);
@@ -20,8 +22,22 @@ class Day05
             {
                 highestSeat = seat;
             }
+            if (seat < lowestSeat)
+            {
+                lowestSeat = seat;
+            }
+            allSeats.Add(seat);
         }
-        Console.WriteLine($"Highest seat: {highestSeat}");
+        Console.WriteLine($"Highest seat: {highestSeat}, lowest seat: {lowestSeat}");
+        allSeats.Sort();
+        for (int i = 0; i < allSeats.Count - 1; i++)
+        {
+            if (allSeats[i + 1] - allSeats[i] != 1)
+            {
+                Console.WriteLine($"My seat is {allSeats[i] + 1}");
+            }
+        }
+
     }
 
     private int parsePass(string pass)
@@ -54,7 +70,7 @@ class Day05
 
     private int parseUnit(string unit, char lowerChar, char upperChar, int lower, int upper)
     {
-        // Console.WriteLine($"{unit} -- lower: {lower}, upper: {upper}");
+        // Console.WriteLine($"{unit} -- lower: {lower}, upper: {upper}");`
 
         //  Final stage
         if (unit.Length == 0)

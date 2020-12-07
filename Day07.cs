@@ -14,9 +14,9 @@ class Day07
         Console.WriteLine($"This many data points: {data.Count}");
 
         //   part one
-        // HashSet<string> relevantBags = new HashSet<string>();
-        // getContainersForType(relevantBags, "shiny gold");
-        // Console.WriteLine($"Number of bags that can contain shiny gold bags: {relevantBags.Count}");
+        HashSet<string> relevantBags = new HashSet<string>();
+        getContainersForType(relevantBags, "shiny gold");
+        Console.WriteLine($"Number of bags that can contain shiny gold bags: {relevantBags.Count}");
 
         //  part two
         //  parse data into dictionaries for ease of reference
@@ -25,7 +25,7 @@ class Day07
         {
             allBags.Add(rule.Split(" bags contain ")[0], rule.Split(" bags contain ")[1]);
         }
-        Console.WriteLine($"This many unique bags: {allBags.Count}");
+        Console.WriteLine($"This many unique bags: {allBags.Count}"); // just to make sure no duplicates
         int numBagsInShinyGold = getNumberOfBagsForTypeIncludingItself(allBags, "shiny gold");
         Console.WriteLine($"shiny gold bags contain {numBagsInShinyGold - 1} bags.");
     }
@@ -58,7 +58,7 @@ class Day07
         int numBagsIncludingSelf = 1;
         foreach (var bag in interior)
         {
-            Console.WriteLine($"\tinside: {type}, {bag.NumBags} {bag.BagType}");
+            // Console.WriteLine($"\tinside: {type}, {bag.NumBags} {bag.BagType}");
             int bagsInside = bag.NumBags * getNumberOfBagsForTypeIncludingItself(allBags, bag.BagType);
             numBagsIncludingSelf += bagsInside;
         }
@@ -75,14 +75,15 @@ class Day07
         }
 
         string[] parsedInterior = allBags[type].Split(", ");
-        //  each bag data contains a number, a two-word description, and the word "bag" or "bags" (which can be ignored)
         foreach (string bagData in parsedInterior)
         {
             string[] individualBagData = bagData.Split(" ");
+            //  if bag is empty, instead of number plus type, interior is "no other bags"
             if (individualBagData[0] == "no")
             {
                 continue;
             }
+            //  otherwise, bag data contains a number, a two-word description, and the word "bag" or "bags" (which can be ignored)
             int quantity = int.Parse(individualBagData[0]);
             string bagType = individualBagData[1] + " " + individualBagData[2];
             interiorList.Add((quantity, bagType));

@@ -13,46 +13,48 @@ class Day08
     public void calculate()
     {
         Console.WriteLine($"Instructions: {data.Count}");
-        HashSet<int> executedInstructions = doPartOne(data);
+        HashSet<int> executedInstructions = doPartOne(data, true);
         doPartTwo(executedInstructions);
     }
 
-    private HashSet<int> doPartOne(List<string> dataToTest)
+    private HashSet<int> doPartOne(List<string> dataToTest, bool writeInfiniteLoopResults)
     {
         HashSet<int> executedInstructions = new HashSet<int>();
         int total = 0;
         int currentIndex = 0;
         while (!executedInstructions.Contains(currentIndex))
         {
+            if (currentIndex == dataToTest.Count - 1)
+            {
+                Console.WriteLine($"End of program reached at index {currentIndex}: {total}");
+                break;
+            }
             executedInstructions.Add(currentIndex);
-            (int newTotal, int newIndex) = executeInstruction(dataToTest, total, currentIndex);
-            currentIndex = newIndex;
-            total = newTotal;
+            (int totalChange, int indexChange) = executeInstruction(dataToTest[currentIndex]);
+            currentIndex += indexChange;
+            total += totalChange;
         }
-        Console.WriteLine($"Infinite loop found: {total}");
-        Console.WriteLine($"Number of attempted instructions: {executedInstructions.Count}");
+        if (writeInfiniteLoopResults)
+        {
+            Console.WriteLine($"While loop completed. Total: {total}");
+            Console.WriteLine($"Number of attempted instructions: {executedInstructions.Count}");
+        }
         return executedInstructions;
     }
-    private (int newTotal, int newIndex) executeInstruction(List<string> dataToTest, int total, int index)
+    private (int newTotal, int newIndex) executeInstruction(string instruction)
     {
-        if (index >= dataToTest.Count - 1)
-        {
-            Console.WriteLine("************************************");
-            Console.WriteLine($"End of program reached: {total}, index: {index}");
-            return (0, 0);
-        }
-        string[] instruction = dataToTest[index].Split(" ");
-        int value = instruction[1][0] == '+' ? int.Parse(instruction[1].Substring(1)) : int.Parse(instruction[1].Substring(1)) * -1;
-        switch (instruction[0])
+        string[] parsed = instruction.Split(" ");
+        int value = parsed[1][0] == '+' ? int.Parse(parsed[1].Substring(1)) : int.Parse(parsed[1].Substring(1)) * -1;
+        switch (parsed[0])
         {
             case "acc":
-                return (total + value, index + 1);
+                return (value, 1);
             case "jmp":
-                return (total, index + value);
+                return (0, value);
             case "nop":
-                return (total, index + 1);
+                return (0, 1);
             default:
-                Console.WriteLine($"Error with instruction, line {index}, prob value: {instruction[0]}");
+                Console.WriteLine($"Error with instruction: {instruction}");
                 break;
         }
         return (0, 0);
@@ -64,18 +66,15 @@ class Day08
         {
             if (data[index].Split(" ")[0] == "acc") { continue; }
             List<string> testInstructions = new List<string>(data);
-            Console.WriteLine($"Changing index {index}");
             if (testInstructions[index].Substring(0, 3) == "nop")
             {
                 testInstructions[index] = testInstructions[index].Replace("nop", "jmp");
-                Console.WriteLine($"Changing test instr repl with jmp {index}: {testInstructions[index]}");
             }
             else
             {
                 testInstructions[index] = testInstructions[index].Replace("jmp", "nop");
-                Console.WriteLine($"Changing test instr repl with nop {index}: {testInstructions[index]}");
             }
-            doPartOne(testInstructions);
+            doPartOne(testInstructions, false);
         }
     }
 }

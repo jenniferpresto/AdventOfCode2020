@@ -36,23 +36,27 @@ namespace AdventCode
             // var day7 = new Day07(data7);
             // day7.calculate();
 
-            List<string> data8 = ReadStringData("./data/adventData_08.txt");
-            var day8 = new Day08(data8);
-            day8.calculate();
+            // List<string> data8 = ReadStringData("./data/adventData_08.txt");
+            // var day8 = new Day08(data8);
+            // day8.calculate();
+
+            List<UInt64> data9 = ReadIntData("./data/adventData_09.txt");
+            var day9 = new Day09(data9);
+            day9.calculate();
 
             Console.Write("\nDone");
         }
 
-        static List<int> ReadIntData(string pathname)
+        static List<UInt64> ReadIntData(string pathname)
         {
             var reader = new StreamReader(pathname);
             using (reader)
             {
-                List<int> numbers = new List<int>();
+                List<UInt64> numbers = new List<UInt64>();
                 while (!reader.EndOfStream)
                 {
                     var line = reader.ReadLine();
-                    int number = int.Parse(line);
+                    UInt64 number = UInt64.Parse(line);
                     numbers.Add(number);
                 }
                 return numbers;

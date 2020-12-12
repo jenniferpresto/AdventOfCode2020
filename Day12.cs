@@ -22,7 +22,7 @@ class Day12
         int currentlyFacing = 1;
         foreach (string line in data)
         {
-            Console.WriteLine("****** " + line);
+            // Console.WriteLine("****** " + line);
             (char instruction, int value) step = parseLine(line);
             if (step.instruction == 'N' || step.instruction == 'E' || step.instruction == 'S' || step.instruction == 'W')
             {
@@ -76,7 +76,6 @@ class Day12
         int[] shipPos = new int[] { 0, 0 }; // x = position[0], y = position[1]
         int[] waypointRelPos = new int[] { 10, -1 };
         char[] directions = new char[] { 'N', 'E', 'S', 'W' };
-        int currentlyFacing = 1;
 
         foreach (string line in data)
         {

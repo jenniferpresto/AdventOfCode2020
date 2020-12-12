@@ -1,4 +1,4 @@
-# BUilds
+# Builds
 bin/
 obj/
 .vs/
@@ -9,3 +9,5 @@ obj/
 *.csv
 *.txt
 
+# OSX stuff
+.DS_Store

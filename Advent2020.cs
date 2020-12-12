@@ -40,11 +40,21 @@ namespace AdventCode
             // var day8 = new Day08(data8);
             // day8.calculate();
 
-            List<UInt64> data9 = ReadIntData("./data/adventData_09.txt");
-            var day9 = new Day09(data9);
-            day9.calculate();
+            // List<UInt64> data9 = ReadIntData("./data/adventData_09.txt");
+            // var day9 = new Day09(data9);
+            // day9.calculate();
 
-            Console.Write("\nDone");
+            // List<string> data10 = ReadStringData("./data/adventData_10.txt");
+            // var day10 = new Day10(data10);
+            // day10.calculate();
+
+
+            List<string> data11 = ReadStringData("./data/adventData_11.txt");
+            var day11 = new Day11(data11);
+            day11.calculate();
+
+            Console.WriteLine("\nDone");
+
         }
 
         static List<UInt64> ReadIntData(string pathname)

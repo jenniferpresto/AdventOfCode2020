@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 class Day16
 {
@@ -88,7 +89,7 @@ class Day16
     {
         //  parse data more finely than in part one
         Dictionary<string, List<(int low, int high)>> rules = new Dictionary<string, List<(int, int)>>();
-        List<List<int>> allTickets = new List<List<int>>();
+        List<List<int>> nearbyTickets = new List<List<int>>();
         List<List<int>> validTickets = new List<List<int>>();
         List<int> myTicket = new List<int>();
 
@@ -124,7 +125,6 @@ class Day16
             //  add values of other tickets to other list
             else
             {
-                Console.WriteLine(data[i]);
                 List<int> ticketValues = new List<int>();
                 foreach (string ticketVal in data[i].Split(','))
                 {
@@ -137,21 +137,21 @@ class Day16
                 }
                 else
                 {
-                    allTickets.Add(ticketValues);
+                    nearbyTickets.Add(ticketValues);
                 }
             }
         }
 
         // //  print everything out
         // Console.WriteLine("Rules");
-        foreach (var rule in rules)
-        {
-            Console.WriteLine(rule.Key);
-            foreach (var range in rule.Value)
-            {
-                Console.WriteLine($"\tlow: {range.low}, high: {range.high}");
-            }
-        }
+        // foreach (var rule in rules)
+        // {
+        //     Console.WriteLine(rule.Key);
+        //     foreach (var range in rule.Value)
+        //     {
+        //         Console.WriteLine($"\tlow: {range.low}, high: {range.high}");
+        //     }
+        // }
         // Console.WriteLine("My ticket");
         // foreach (int val in myTicket)
         // {
@@ -170,17 +170,142 @@ class Day16
         // }
 
         //  create list of only valid tickets
-        for (int i = 0; i < allTickets.Count; i++)
+        for (int i = 0; i < nearbyTickets.Count; i++)
         {
+            bool valuesAllFit = true;
+            foreach (int val in nearbyTickets[i])
+            {
+                if (!valueFitsInAtLeastOneRange(val, rules))
+                {
+                    valuesAllFit = false;
+                    break;
+                }
+            }
+            if (valuesAllFit)
+            {
+                validTickets.Add(nearbyTickets[i]);
+            }
+        }
+        // Console.WriteLine("Valid tickets");
+        // foreach (var ticket in validTickets)
+        // {
+        //     foreach (var val in ticket)
+        //     {
+        //         Console.Write($"{val},");
+        //     }
+        //     Console.WriteLine("");
+        // }
 
+        //  now, check each column for which fields it might be valid for
+        List<(int, List<string>)> validFieldsByColumn = new List<(int, List<string>)>();
+        for (int i = 0; i < validTickets[0].Count; i++)
+        {
+            List<int> column = new List<int>();
+            foreach (var ticket in validTickets)
+            {
+                column.Add(ticket[i]);
+            }
+            List<string> validFields = returnValidFieldNames(column, rules);
+            // Console.WriteLine("***********************");
+            // Console.WriteLine($"column {i} must be: ");
+            // foreach (string field in validFields)
+            // {
+            //     Console.WriteLine(field);
+            // }
+            validFieldsByColumn.Add((i, validFields));
         }
 
+        //  order our list of columns by length of valid fields
+        validFieldsByColumn.Sort((x, y) => x.Item2.Count.CompareTo(y.Item2.Count));
+        for (int i = 0; i < validFieldsByColumn.Count; i++)
+        {
+            // Console.WriteLine($"**************Column {column.Item1}");
+            // foreach (var field in column.Item2)
+            // {
+            //     Console.WriteLine(field);
+            // }
+
+            //  at this point in the for loop, each column should have only one item, as we delete them progressively from the additional items
+            //  if not, give warning
+            if (validFieldsByColumn[i].Item2.Count != 1)
+            {
+                Console.WriteLine("Unexpected number of items left in list of valid fields!");
+            }
+            string relevantField = validFieldsByColumn[i].Item2[0];
+            for (int j = i + 1; j < validFieldsByColumn.Count; j++)
+            {
+                //  delete the relevant field from other fields
+                validFieldsByColumn[j].Item2.Remove(relevantField);
+            }
+        }
+        //  make sure we just have one left apiece
+        //  also calculate our final answer
+        long product = 1;
+        for (int i = 0; i < validFieldsByColumn.Count; i++)
+        {
+            if (validFieldsByColumn[i].Item2.Count != 1)
+            {
+                Console.WriteLine("Something went wrong");
+            }
+            Console.WriteLine($"Column {validFieldsByColumn[i].Item1} must be {validFieldsByColumn[i].Item2[0]}");
+            if (validFieldsByColumn[i].Item2[0].StartsWith("departure"))
+            {
+                Console.WriteLine($"Column is {validFieldsByColumn[i].Item1}, value in my ticket is {myTicket[validFieldsByColumn[i].Item1]}");
+                product *= myTicket[validFieldsByColumn[i].Item1];
+                Console.WriteLine($"New product: {product}");
+            }
+        }
+        Console.WriteLine($"Answer is {product}");
 
     }
 
     private bool valueFitsInAtLeastOneRange(int val, Dictionary<string, List<(int low, int high)>> rules)
     {
-        return true;
+        bool valueIsValid = false;
+        foreach (var rule in rules)
+        {
+            if (val >= rule.Value[0].low && val <= rule.Value[0].high)
+            {
+                valueIsValid = true;
+                break;
+            }
+            if (val >= rule.Value[1].low && val <= rule.Value[1].high)
+            {
+                valueIsValid = true;
+                break;
+            }
+        }
+        return valueIsValid;
+    }
+
+    private List<string> returnValidFieldNames(List<int> values, Dictionary<string, List<(int low, int high)>> rules)
+    {
+        Dictionary<string, bool> ruleNames = new Dictionary<string, bool>();
+        foreach (var rule in rules)
+        {
+            ruleNames.Add(rule.Key, false);
+            bool allValuesWork = true;
+            foreach (int val in values)
+            {
+                if ((val >= rule.Value[0].low && val <= rule.Value[0].high) || (val >= rule.Value[1].low && val <= rule.Value[1].high))
+                {
+                    continue;
+                }
+                allValuesWork = false;
+            }
+            ruleNames[rule.Key] = allValuesWork;
+        }
+
+
+        List<string> validFields = new List<string>();
+        foreach (var rule in ruleNames)
+        {
+            if (rule.Value)
+            {
+                validFields.Add(rule.Key);
+            }
+        }
+        return validFields;
     }
 
 }

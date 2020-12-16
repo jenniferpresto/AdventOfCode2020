@@ -13,8 +13,9 @@ class Day15
 
     public void calculate()
     {
-        doCalculationWithList(2020);
-        doCalculationWithDictionary(3000000);
+        doCalculationWithList(1000000);
+        doCalculationWithArray(1000000);
+        doCalculationWithDictionary(1000000);
     }
 
     private void doCalculationWithList(int target)
@@ -25,6 +26,7 @@ class Day15
             numbers.Add(int.Parse(number));
         }
         int numStarters = numbers.Count;
+        Console.WriteLine("##################################################");
         Console.WriteLine($"Started: {DateTime.Now}");
         for (int i = numStarters - 1; i < target; i++)
         {
@@ -54,6 +56,46 @@ class Day15
         Console.WriteLine($"numbers size: {numbers.Count}");
         Console.WriteLine($"Answer is {numbers[target - 1]}");
     }
+
+    public void doCalculationWithArray(int target)
+    {
+        int[] numbers = new int[target + 1];
+        for (int i = 0; i < data[0].Split(",").Length; i++)
+        {
+            numbers[i] = int.Parse(data[0].Split(",")[i]);
+        }
+        int numStarters = data[0].Split(",").Length;
+        Console.WriteLine("##################################################");
+        Console.WriteLine($"Started: {DateTime.Now}");
+        for (int i = numStarters; i < target; i++)
+        {
+            //  consider the last number
+            int considerNum = numbers[i - 1];
+            // Console.WriteLine($"Considering # {considerNum} to calculate index {i}");
+
+            //  see how many exist
+            int distanceBack = 0;
+            bool foundNum = false;
+            for (int j = i - 2; j > -1; j--)
+            {
+                if (numbers[j] == considerNum)
+                {
+                    distanceBack = i - 1 - j;
+                    numbers[i] = distanceBack;
+                    // Console.WriteLine($"Found this far back: {distanceBack} at index {j}; adding {distanceBack} to index {i}");
+                    foundNum = true;
+                    break;
+                }
+            }
+            if (!foundNum)
+            {
+                // Console.WriteLine($"Not found: adding 0 to index {i}");
+                numbers[i] = 0;
+            }
+        }
+        Console.WriteLine($"Finished: {DateTime.Now}");
+        Console.WriteLine($"Answer using array is {numbers[target - 1]}");
+    }
     public void doCalculationWithDictionary(int target)
     {
         Dictionary<int, int> numbers = new Dictionary<int, int>();
@@ -82,6 +124,7 @@ class Day15
         //  it's not yet added to the dictionary
         int lastNumSpoken = originalList[originalList.Count - 1];
         turn = originalList.Count + 1;
+        Console.WriteLine("##################################################");
         Console.WriteLine($"Started: {DateTime.Now}");
         while (true)
         {

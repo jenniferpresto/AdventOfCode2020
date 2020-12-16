@@ -31,24 +31,14 @@ class Day16
             {
                 if (data[i] == "")
                 {
-                    // Console.WriteLine("Hit the end of the ranges");
                     readingRules = false;
                     i += 4;
                     continue;
                 }
 
                 string[] splitLine = data[i].Split(": ")[1].Split(' ', '-');
-                // foreach (string datapoint in splitLine)
-                // {
-                //     Console.WriteLine(datapoint);
-
-                // }
                 validRanges.Add((int.Parse(splitLine[0]), int.Parse(splitLine[1])));
                 validRanges.Add((int.Parse(splitLine[3]), int.Parse(splitLine[4])));
-                // foreach (var range in validRanges)
-                // {
-                //     Console.WriteLine(range);
-                // }
             }
             //  add values of other tickets to other list
             else
@@ -110,9 +100,6 @@ class Day16
 
                 string fieldName = data[i].Split(":")[0];
                 string[] rangeData = data[i].Split(": ")[1].Split(' ', '-');
-                // foreach (string datapoint in splitLine)
-                // {
-                //     Console.WriteLine(datapoint);
 
                 List<(int, int)> ranges = new List<(int, int)>();
 
@@ -142,33 +129,6 @@ class Day16
             }
         }
 
-        // //  print everything out
-        // Console.WriteLine("Rules");
-        // foreach (var rule in rules)
-        // {
-        //     Console.WriteLine(rule.Key);
-        //     foreach (var range in rule.Value)
-        //     {
-        //         Console.WriteLine($"\tlow: {range.low}, high: {range.high}");
-        //     }
-        // }
-        // Console.WriteLine("My ticket");
-        // foreach (int val in myTicket)
-        // {
-        //     Console.Write($"{val},");
-        // }
-        // Console.Write("\n");
-        // Console.WriteLine("other tickets");
-        // foreach (var ticket in allTickets)
-        // {
-
-        //     foreach (var val in ticket)
-        //     {
-        //         Console.Write($"{val},");
-        //     }
-        //     Console.Write("\n");
-        // }
-
         //  create list of only valid tickets
         for (int i = 0; i < nearbyTickets.Count; i++)
         {
@@ -186,16 +146,6 @@ class Day16
                 validTickets.Add(nearbyTickets[i]);
             }
         }
-        // Console.WriteLine("Valid tickets");
-        // foreach (var ticket in validTickets)
-        // {
-        //     foreach (var val in ticket)
-        //     {
-        //         Console.Write($"{val},");
-        //     }
-        //     Console.WriteLine("");
-        // }
-
         //  now, check each column for which fields it might be valid for
         List<(int, List<string>)> validFieldsByColumn = new List<(int, List<string>)>();
         for (int i = 0; i < validTickets[0].Count; i++)
@@ -206,25 +156,15 @@ class Day16
                 column.Add(ticket[i]);
             }
             List<string> validFields = returnValidFieldNames(column, rules);
-            // Console.WriteLine("***********************");
-            // Console.WriteLine($"column {i} must be: ");
-            // foreach (string field in validFields)
-            // {
-            //     Console.WriteLine(field);
-            // }
             validFieldsByColumn.Add((i, validFields));
         }
 
         //  order our list of columns by length of valid fields
         validFieldsByColumn.Sort((x, y) => x.Item2.Count.CompareTo(y.Item2.Count));
+
+        //  weed out fields for each column, starting with the column with only one option
         for (int i = 0; i < validFieldsByColumn.Count; i++)
         {
-            // Console.WriteLine($"**************Column {column.Item1}");
-            // foreach (var field in column.Item2)
-            // {
-            //     Console.WriteLine(field);
-            // }
-
             //  at this point in the for loop, each column should have only one item, as we delete them progressively from the additional items
             //  if not, give warning
             if (validFieldsByColumn[i].Item2.Count != 1)
@@ -247,12 +187,15 @@ class Day16
             {
                 Console.WriteLine("Something went wrong");
             }
-            Console.WriteLine($"Column {validFieldsByColumn[i].Item1} must be {validFieldsByColumn[i].Item2[0]}");
+            Console.Write($"Column {validFieldsByColumn[i].Item1} must be {validFieldsByColumn[i].Item2[0]}");
             if (validFieldsByColumn[i].Item2[0].StartsWith("departure"))
             {
-                Console.WriteLine($"Column is {validFieldsByColumn[i].Item1}, value in my ticket is {myTicket[validFieldsByColumn[i].Item1]}");
+                Console.WriteLine($"; value in my ticket is {myTicket[validFieldsByColumn[i].Item1]}");
                 product *= myTicket[validFieldsByColumn[i].Item1];
-                Console.WriteLine($"New product: {product}");
+            }
+            else
+            {
+                Console.WriteLine();
             }
         }
         Console.WriteLine($"Answer is {product}");

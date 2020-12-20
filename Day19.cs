@@ -7,7 +7,6 @@ class Day19
     Dictionary<string, List<string>> allRules = new Dictionary<string, List<string>>();
     Dictionary<string, List<string>> expandedRules = new Dictionary<string, List<string>>();
     Dictionary<string, List<string>> allLetterSubstitutions = new Dictionary<string, List<string>>();
-    Dictionary<string, string> rootNodes = new Dictionary<string, string>();
     HashSet<string> allPossibilities = new HashSet<string>();
     HashSet<string> receivedMessages = new HashSet<string>();
 
@@ -31,27 +30,20 @@ class Day19
         int numPasses = 0;
         while (!allLetterSubstitutions.ContainsKey("0"))
         {
-            Console.WriteLine($"pass {numPasses}##############################");
-            Console.WriteLine($"Num rules: {allRules.Count}");
+            Console.WriteLine($"pass {numPasses}##############################, {allRules.Count} rules left");
             copyAllRulesIntoExpandedRules();
-            Console.WriteLine("Starting substitution");
             performSubstitutionsAndPutIntoExpandedRules();
-            Console.WriteLine("Finished substitution");
             copyExpandedRulesIntoAllRules();
             expandedRules.Clear();
             separateSubstitutions();
 
             numPasses++;
-            // if (allLetterSubstitutions.ContainsKey("0")) break;
-            // Console.ReadLine();
         }
-
-        // Console.WriteLine($"allrules no longer contains key 0; it has {allLetterSubstitutions["0"].Count}");
-        Console.WriteLine($"One rule left, this many substitutions: {allLetterSubstitutions.Count}");
 
         foreach (var value in allLetterSubstitutions["0"])
         {
             allPossibilities.Add(value.Replace(" ", ""));
+            // Console.WriteLine(value.Replace(" ", ""));
         }
 
         HashSet<string> validReceivedMessages = new HashSet<string>(allPossibilities);
@@ -62,22 +54,15 @@ class Day19
             Console.WriteLine(i);
         }
         Console.WriteLine($"There are {validReceivedMessages.Count} valid messages");
-
-
     }
 
     private void separateSubstitutions()
     {
-        Console.WriteLine($"We start with this many: {allRules.Count} ");
-
-        // bool weHit26 = false;
         foreach (var rule in allRules)
         {
             if (ruleStillHasNumbers(rule.Key)) { continue; }
             for (int i = 0; i < rule.Value.Count; i++)
             {
-                // remove spaces and save in substitute list
-                // string condensedVal = rule.Value[i];
                 string condensedVal = rule.Value[i].Replace(" ", "") + " ";
                 rule.Value[i] = condensedVal;
             }
@@ -90,7 +75,6 @@ class Day19
             if (allRules.ContainsKey(substitute.Key))
             {
                 allRules.Remove(substitute.Key);
-                Console.WriteLine($"REmoving rule from allRules: {substitute.Key}; new legnth is {allRules.Count}");
             }
         }
     }
@@ -110,84 +94,33 @@ class Day19
     }
     private void performSubstitutionsAndPutIntoExpandedRules()
     {
-        // Console.WriteLine($"Performing...; thiere is {allRules.Count} rule left");
-        // string zeroStr = "0";
-        // bool shouldPrint = false;
-        // if (allRules.Count == 1)
-        // {
-        //     if (allRules.First().Key == "0")
-        //     {
-        //         // Console.WriteLine($"0 has {allRules[zeroStr].Count}, first one is {allRules[zeroStr][0]}");
-        //         // Console.WriteLine($"Rule 11 has {allLetterSubstitutions[elevenStr].Count} values");
-        //         Console.WriteLine($"There are {allLetterSubstitutions.Count} substitutions; allRules has 1 rule, which has {allRules.First().Value.Count} values");
-        //         Console.WriteLine($"First value is {allRules.First().Value[0]}");
-        //         Console.WriteLine($"Does 0 already exist in substitutes? {allLetterSubstitutions.ContainsKey(zeroStr)}");
-
-        //         shouldPrint = true;
-
-        //     }
-        // }
-
         foreach (var rule in allRules)
         {
-            bool shouldPrint = false;
-            if (rule.Key == "0")
-            {
-                shouldPrint = true;
-            }
-
             List<string> listOfNewValues = new List<string>(rule.Value);
             int valIndex = 0;
             foreach (var origValue in rule.Value)
             {
-                // if (shouldPrint) { Console.WriteLine($"original value: {origValue}, {valIndex} out of {allRules.First().Value.Count}"); }
                 List<string> replacementsForOrigValue = new List<string>();
 
                 foreach (var substitute in allLetterSubstitutions)
                 {
-                    bool foundASubstute = false;
                     if (origValue.Contains(" " + substitute.Key + " "))
                     {
-                        foundASubstute = true;
-                        // if (shouldPrint) { Console.WriteLine($"Rule {substitute.Key} has {substitute.Value.Count} values"); }
-                        // int rule11Index = 0;
                         foreach (string subString in substitute.Value)
                         {
-                            // if (shouldPrint) Console.WriteLine($"adding substitute index {subIndex}, adding value {subString}");
                             replacementsForOrigValue.Add(origValue.Replace(" " + substitute.Key + " ", " " + subString + " "));
-                            // rule11Index++;
-                            // if (shouldPrint) Console.WriteLine($"Added {rule11Index}; last one was {subString}");
-                            // if (rule11Index > 16380) Console.ReadLine();
                         }
                         break; // let's do this just one substitute key at a time
                     }
-                    else
-                    {
-                        // if (shouldPrint) { Console.WriteLine($"Skipping {substitute.Key} because not in rule"); }
-                    }
-                    if (foundASubstute) break;
-                    // subIndex++;
-                    // if (subIndex > 130)
-                    // {
-                    //     Console.WriteLine($"Press enter {subIndex}");
-                    //     Console.ReadLine();
-                    // }
                 }
-                // if (shouldPrint)
-                // {
-                //     Console.WriteLine($"Press enter outside loop; looking at {origValue}");
-                //     Console.ReadLine();
-                // }
                 if (replacementsForOrigValue.Count > 0)
                 {
                     listOfNewValues.Remove(origValue);
                     listOfNewValues.AddRange(replacementsForOrigValue);
-                    listOfNewValues = listOfNewValues.Distinct().ToList();
                 }
                 valIndex++;
             }
             //  modify the expanded rules accordingly
-            Console.WriteLine($"Got through ths for loop for rule {rule.Key}");
             expandedRules.Remove(rule.Key);
             expandedRules[rule.Key] = listOfNewValues;
         }
@@ -266,7 +199,6 @@ class Day19
                 string[] splitLine = line.Split(": ");
                 if (splitLine[1].Contains("\""))
                 {
-                    rootNodes.Add(splitLine[0], splitLine[1][1].ToString());
                     subrules.Add(splitLine[1][1].ToString());
                 }
                 else
@@ -282,7 +214,6 @@ class Day19
             else
             {
                 receivedMessages.Add(line);
-                //  TODO: parse messages
             }
         }
 

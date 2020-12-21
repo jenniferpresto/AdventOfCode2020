@@ -4,7 +4,7 @@ using System.Collections.Generic;
 class Day20
 {
     private List<string> data;
-    private const int NUM_TILES_PER_SIDE = 3;
+    private const int NUM_TILES_PER_SIDE = 12;
     Dictionary<int, string[]> tiles = new Dictionary<int, string[]>();
     List<int> listOfTileNames = new List<int>();
     int[,] arrangedTiles = new int[NUM_TILES_PER_SIDE, NUM_TILES_PER_SIDE]; // depends on size of data set (test data is 3x3, actual data is 12x12)
@@ -25,6 +25,43 @@ class Day20
         printArrangedTiles();
         createPhotoOnly();
         printPhoto();
+
+        //  search for sea monsters
+        int numMonsters = 0;
+        for (int i = 0; i < 8; i++)
+        {
+            numMonsters = countSeaMonsters();
+            if (numMonsters > 0)
+            {
+                Console.WriteLine($"Found {numMonsters} sea monsters");
+                break;
+            }
+            if (i == 4)
+            {
+                photo = flipTileOverTB(photo);
+            }
+            else
+            {
+                photo = rotateTileClockwise(photo);
+            }
+        }
+
+        int totalHashes = 0;
+        for (int i = 0; i < photo.Length; i++)
+        {
+            for (int j = 0; j < photo[i].Length; j++)
+            {
+                if (photo[i][j] == '#')
+                {
+                    totalHashes++;
+                }
+            }
+        }
+        Console.WriteLine($"Total hashes {totalHashes}");
+
+        //  substract sea monster hashes (each monster is 15 hashes)
+        int part2Ans = totalHashes - (numMonsters * 15);
+        Console.WriteLine($"Answer to part 2 is {part2Ans}");
     }
 
     private void createTilesAndFindCorners()
@@ -142,6 +179,50 @@ class Day20
         }
     }
 
+    private int countSeaMonsters()
+    {
+        //  sea monsters look like this:
+        //                           # 
+        // #    ##    ##    ###
+        //  #  #  #  #  #  #   
+
+        int numSeaMonsters = 0;
+        //  counting from point that's one up from the bottom
+        for (int y = 1; y < photo.Length - 1; y++)
+        {
+            //  20 is length of monster
+            //  count from tip of tail (one below its head)
+            for (int x = 0; x < photo[y].Length - 19; x++)
+            {
+                if (photo[y][x] != '#') continue;
+                //  just spell out what it has to be
+                if (photo[y + 1][x + 1] == '#' &&
+                    photo[y + 1][x + 4] == '#' &&
+                    photo[y][x + 5] == '#' &&
+                    photo[y][x + 6] == '#' &&
+                    photo[y + 1][x + 7] == '#' &&
+                    photo[y + 1][x + 10] == '#' &&
+                    photo[y][x + 11] == '#' &&
+                    photo[y][x + 12] == '#' &&
+                    photo[y + 1][x + 13] == '#' &&
+                    photo[y + 1][x + 16] == '#' &&
+                    photo[y][x + 17] == '#' &&
+                    photo[y][x + 18] == '#' &&
+                    photo[y][x + 19] == '#' &&
+                    photo[y - 1][x + 18] == '#'
+                )
+                {
+                    numSeaMonsters++;
+                    //  easier check to see if they're overlapping
+                    Console.WriteLine($"Found sea monster at row {y}, col {x}");
+
+
+                }
+            }
+        }
+        return numSeaMonsters;
+    }
+
     private int getTileToRightAndReorient(int alreadyPlacedTileName)
     {
         // Console.WriteLine($"Getting tile to the right of {alreadyPlacedTileName}");
@@ -199,14 +280,14 @@ class Day20
                 break;
 
         }
-        Console.WriteLine($"Comparing to this tile: {alreadyPlacedTileName}");
-        printTile(alreadyPlacedTileName);
-        Console.WriteLine($"Reorienting {tileOnRight}; before");
-        printTile(tileOnRight);
+        // Console.WriteLine($"Comparing to this tile: {alreadyPlacedTileName}");
+        // printTile(alreadyPlacedTileName);
+        // Console.WriteLine($"Reorienting {tileOnRight}; before");
+        // printTile(tileOnRight);
         tiles[tileOnRight] = reorientedTile;
-        Console.WriteLine("after");
-        printTile(tiles[tileOnRight]);
-        printAdjancenciesForTile(tileOnRight);
+        // Console.WriteLine("after");
+        // printTile(tiles[tileOnRight]);
+        // printAdjancenciesForTile(tileOnRight);
         return tileOnRight;
     }
 
@@ -333,10 +414,10 @@ class Day20
 
     private string[] flipTileOverTB(string[] tileData)
     {
-        string[] newTile = new string[10];
-        for (int i = 0; i < 10; i++)
+        string[] newTile = new string[tileData.Length];
+        for (int i = 0; i < tileData.Length; i++)
         {
-            newTile[9 - i] = tileData[i];
+            newTile[tileData.Length - 1 - i] = tileData[i];
         }
         return newTile;
     }

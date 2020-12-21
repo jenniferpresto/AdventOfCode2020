@@ -4,13 +4,13 @@ using System.Collections.Generic;
 class Day20
 {
     private List<string> data;
-    private const int NUM_TILES_PER_SIDE = 12;
+    private const int NUM_TILES_PER_SIDE = 3;
     Dictionary<int, string[]> tiles = new Dictionary<int, string[]>();
     List<int> listOfTileNames = new List<int>();
     int[,] arrangedTiles = new int[NUM_TILES_PER_SIDE, NUM_TILES_PER_SIDE]; // depends on size of data set (test data is 3x3, actual data is 12x12)
     Dictionary<int, List<int>> adjacentTiles = new Dictionary<int, List<int>>();
     Dictionary<int, int> totalSharedEdgesByTiles = new Dictionary<int, int>();
-
+    string[] photo = new string[NUM_TILES_PER_SIDE * 8]; // losing two from every edge
     public Day20(List<string> dataList)
     {
         data = dataList;
@@ -21,6 +21,10 @@ class Day20
         parseTiles();
         createTilesAndFindCorners();
         assembleTilesInOrder();
+        printGridOfArrangedTileNames();
+        printArrangedTiles();
+        createPhotoOnly();
+        printPhoto();
     }
 
     private void createTilesAndFindCorners()
@@ -82,12 +86,7 @@ class Day20
             }
         }
 
-        printListOfAllAdjacentTiles();
-        //  testing
-        // foreach (var adjTile in adjacentTiles[2473])
-        // {
-        //     Console.WriteLine($"Piece 2473 adjacent to {adjTile}, share {getCommonEdges(2473, adjTile)} edges");
-        // }
+        // printListOfAllAdjacentTiles();
     }
 
     private void assembleTilesInOrder()
@@ -118,13 +117,34 @@ class Day20
                 arrangedTiles[0, y + 1] = nextTile;
             }
         }
-        printGridOfArrangedTileNames();
-        printArrangedTiles();
+    }
+
+    private void createPhotoOnly()
+    {
+        for (int y = 0; y < NUM_TILES_PER_SIDE; y++)
+        {
+            string[] fullRow = new string[8]; // dropping top and bottom
+            for (int x = 0; x < NUM_TILES_PER_SIDE; x++)
+            {
+                for (int i = 1; i < 9; i++)
+                {
+                    if (x == 0)
+                    {
+                        fullRow[i - 1] = "";
+                    }
+                    fullRow[i - 1] += tiles[arrangedTiles[x, y]][i].Substring(1, 8); // dropping left and right
+                }
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                photo[8 * y + i] = fullRow[i];
+            }
+        }
     }
 
     private int getTileToRightAndReorient(int alreadyPlacedTileName)
     {
-        Console.WriteLine($"Getting tile to the right of {alreadyPlacedTileName}");
+        // Console.WriteLine($"Getting tile to the right of {alreadyPlacedTileName}");
         string edgeConnectedToRightEdge = "";
         int tileOnRight = -1;
         //  get the correct tile from the possible connected ones
@@ -133,23 +153,15 @@ class Day20
             (string tile1Edge, string tile2Edge) connection = getCommonEdges(alreadyPlacedTileName, tileName);
             if (connection.tile1Edge == "right")
             {
-                Console.WriteLine($"Tile {tileName} is on the right and is connected by its {connection.tile2Edge}");
+                // Console.WriteLine($"Tile {tileName} is on the right and is connected by its {connection.tile2Edge}");
                 edgeConnectedToRightEdge = connection.tile2Edge;
                 tileOnRight = tileName;
                 break;
             }
-            // else
-            // {
-            //     Console.WriteLine($"\tskipping tile {tileName} because not correct direction");
-            // }
         }
-        // Console.WriteLine($"Starting with this tile before reorienting {tileOnRight}");
-        // printTile(tileOnRight);
-        //  reorient the tile that's being placed
+        //  reorient the tile that's being placed and store the new tile in the main dictionary
         //  certainly a better way to do this, too
         string[] reorientedTile = new string[10];
-        //  the rotation is counter-intuitive;
-        //  actually changing the way the sides are labeled, not rotating the actual tile
         switch (edgeConnectedToRightEdge)
         {
             case "top":
@@ -177,19 +189,10 @@ class Day20
                 reorientedTile = rotateTileClockwise(reorientedTile);
                 break;
             case "-bottom":
-                // Console.WriteLine("Doin' the -bottom flip!!!!!!!!!");
                 reorientedTile = flipTileOverTB(tileOnRight);
-                // Console.WriteLine("After flip");
-                // printTile(reorientedTile);
                 reorientedTile = rotateTileClockwise(reorientedTile);
-                // Console.WriteLine("After first rotation");
-                // printTile(reorientedTile);
                 reorientedTile = rotateTileClockwise(reorientedTile);
-                // Console.WriteLine("After second rotation");
-                // printTile(reorientedTile);
                 reorientedTile = rotateTileClockwise(reorientedTile);
-                // Console.WriteLine("After third rotation");
-                // printTile(reorientedTile);
                 break;
             case "-left":
                 reorientedTile = flipTileOverTB(tileOnRight);
@@ -204,7 +207,6 @@ class Day20
         Console.WriteLine("after");
         printTile(tiles[tileOnRight]);
         printAdjancenciesForTile(tileOnRight);
-        // Console.ReadLine();
         return tileOnRight;
     }
 
@@ -219,7 +221,7 @@ class Day20
             (string tile1Edge, string tile2Edge) connection = getCommonEdges(alreadyPlacedTileName, tileName);
             if (connection.tile1Edge == "bottom")
             {
-                Console.WriteLine($"Tile {tileName} is on the bottom and is connected by its {connection.tile2Edge}");
+                // Console.WriteLine($"Tile {tileName} is on the bottom and is connected by its {connection.tile2Edge}");
                 edgeConnectedToBottomEdge = connection.tile2Edge;
                 tileOnBottom = tileName;
                 break;
@@ -229,8 +231,6 @@ class Day20
         //  reorient the tile that's being placed
         //  certainly a better way to do this, too
         string[] reorientedTile = new string[10];
-        //  the rotation is counter-intuitive;
-        //  actually changing the way the sides are labeled, not rotating the actual tile
         switch (edgeConnectedToBottomEdge)
         {
             case "top":
@@ -407,6 +407,9 @@ class Day20
         }
     }
 
+    //
+    //  convenience methods
+    //
     private void printTile(int tileName)
     {
         Console.WriteLine($"Tile: {tileName}");
@@ -460,6 +463,15 @@ class Day20
                 Console.Write($"{arrangedTiles[x, y]}\t");
             }
             Console.WriteLine();
+        }
+    }
+
+    private void printPhoto()
+    {
+        Console.WriteLine("Printing the assembled photo");
+        foreach (string line in photo)
+        {
+            Console.WriteLine(line);
         }
     }
 

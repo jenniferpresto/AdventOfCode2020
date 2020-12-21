@@ -4,8 +4,10 @@ using System.Collections.Generic;
 class Day20
 {
     private List<string> data;
+    private const int NUM_TILES_PER_SIDE = 3;
     Dictionary<int, string[]> tiles = new Dictionary<int, string[]>();
     List<int> listOfTileNames = new List<int>();
+    int[,] arrangedTiles = new int[NUM_TILES_PER_SIDE, NUM_TILES_PER_SIDE]; // depends on size of data set (test data is 3x3, actual data is 12x12)
     Dictionary<int, List<int>> adjacentTiles = new Dictionary<int, List<int>>();
     Dictionary<int, int> totalSharedEdgesByTiles = new Dictionary<int, int>();
 
@@ -18,6 +20,7 @@ class Day20
     {
         parseTiles();
         createTilesAndFindCorners();
+        assembleTilesInOrder();
     }
 
     private void createTilesAndFindCorners()
@@ -79,16 +82,170 @@ class Day20
             }
         }
         //  testing
-        // foreach (var adjTile in adjacentTiles[2473])
-        // {
-        //     Console.WriteLine($"Piece 2473 adjacent to {adjTile}, share {getCommonEdges(2473, adjTile)} edges");
-        // }
-        printTile(2311);
-        string[] newTile = flipTileOverTB(2311);
-        printTile(newTile);
-        string[] newAgain = rotateTileClockwise(newTile);
+        foreach (var adjTile in adjacentTiles[2473])
+        {
+            Console.WriteLine($"Piece 2473 adjacent to {adjTile}, share {getCommonEdges(2473, adjTile)} edges");
+        }
+    }
 
-        printTile(newAgain);
+    private void assembleTilesInOrder()
+    {
+        //  pick one of the tiles to be the top right corner (can be any corner; picked one from looking at data that didn't need to be reoriented)
+        //  yes, you could write a function to do this
+        if (NUM_TILES_PER_SIDE == 3)
+        {
+            arrangedTiles[0, 0] = 2971;
+        }
+        else
+        {
+            // arrangedTiles[0, 0] = -1;
+        }
+        for (int y = 0; y < NUM_TILES_PER_SIDE; y++)
+        {
+            int nextTile = 0;
+            for (int x = 0; x < NUM_TILES_PER_SIDE - 1; x++)
+            {
+                Console.WriteLine($"getting tile to the right of {x}, {y}, which is {arrangedTiles[x, y]}");
+                nextTile = getTileToRightAndReorient(arrangedTiles[x, y]);
+                Console.WriteLine($"Assigning {nextTile} to space {x + 1}, {y}");
+                arrangedTiles[x + 1, y] = nextTile;
+            }
+            if (y < NUM_TILES_PER_SIDE - 1)
+            {
+                nextTile = getTileToBottomAndReorient(arrangedTiles[0, y]);
+                arrangedTiles[0, y + 1] = nextTile;
+            }
+        }
+        printGridOfArrangedTileNames();
+        printArrangedTiles();
+    }
+
+    private int getTileToRightAndReorient(int alreadyPlacedTileName)
+    {
+        string edgeConnectedToRightEdge = "";
+        int tileOnRight = -1;
+        //  get the correct tile from the possible connected ones
+        foreach (var tileName in adjacentTiles[alreadyPlacedTileName])
+        {
+            Console.WriteLine($"Adjacent to {tileName}");
+            (string tile1Edge, string tile2Edge) connection = getCommonEdges(alreadyPlacedTileName, tileName);
+            if (connection.tile1Edge == "right")
+            {
+                Console.WriteLine($"Tile {tileName} is on the right and is connected by its {connection.tile2Edge}");
+                edgeConnectedToRightEdge = connection.tile2Edge;
+                tileOnRight = tileName;
+                break;
+            }
+        }
+
+        //  reorient the tile that's being placed
+        //  certain a better way to do this, too
+        string[] reorientedTile = new string[10];
+        //  the rotation is counter-intuitive;
+        //  actually changing the way the sides are labeled, not rotating the actual tile
+        switch (edgeConnectedToRightEdge)
+        {
+            case "top":
+                reorientedTile = rotateTileClockwise(tileOnRight);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+            case "right":
+                reorientedTile = flipTileOverTB(tileOnRight);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+            case "bottom":
+                reorientedTile = rotateTileClockwise(tileOnRight);
+                break;
+            case "left":
+                reorientedTile = tiles[tileOnRight];
+                break;
+            case "-top":
+                reorientedTile = flipTileOverTB(tileOnRight);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+            case "-right":
+                reorientedTile = rotateTileClockwise(tileOnRight);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+            case "-bottom":
+                reorientedTile = flipTileOverTB(tileOnRight);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+            case "-left":
+                reorientedTile = flipTileOverTB(tileOnRight);
+                break;
+
+        }
+        tiles[tileOnRight] = reorientedTile;
+        return tileOnRight;
+    }
+
+    private int getTileToBottomAndReorient(int alreadyPlacedTileName)
+    {
+        string edgeConnectedToBottomEdge = "";
+        int tileOnBottom = -1;
+        //  get the correct tile from the possible connected ones
+        foreach (var tileName in adjacentTiles[alreadyPlacedTileName])
+        {
+            Console.WriteLine($"Adjacent to {tileName}");
+            (string tile1Edge, string tile2Edge) connection = getCommonEdges(alreadyPlacedTileName, tileName);
+            if (connection.tile1Edge == "bottom")
+            {
+                Console.WriteLine($"Tile {tileName} is on the bottom and is connected by its {connection.tile2Edge}");
+                edgeConnectedToBottomEdge = connection.tile2Edge;
+                tileOnBottom = tileName;
+                break;
+            }
+        }
+
+        //  reorient the tile that's being placed
+        //  certainly a better way to do this, too
+        string[] reorientedTile = new string[10];
+        //  the rotation is counter-intuitive;
+        //  actually changing the way the sides are labeled, not rotating the actual tile
+        switch (edgeConnectedToBottomEdge)
+        {
+            case "top":
+                reorientedTile = tiles[tileOnBottom];
+                break;
+            case "right":
+                reorientedTile = rotateTileClockwise(tileOnBottom);
+                break;
+            case "bottom":
+                reorientedTile = flipTileOverTB(tileOnBottom);
+                break;
+            case "left":
+                reorientedTile = flipTileOverTB(tileOnBottom);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+            case "-top":
+                reorientedTile = flipTileOverTB(tileOnBottom);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+            case "-right":
+                reorientedTile = flipTileOverTB(tileOnBottom);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+            case "-bottom":
+                reorientedTile = flipTileOverTB(tileOnBottom);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+            case "-left":
+                reorientedTile = rotateTileClockwise(tileOnBottom);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                break;
+
+        }
+        tiles[tileOnBottom] = reorientedTile;
+        return tileOnBottom;
     }
 
     private (string tile1Edge, string tile2Edge) getCommonEdges(int tile1, int tile2)
@@ -169,11 +326,11 @@ class Day20
 
     private string[] rotateTileClockwise(string[] tileData)
     {
-        string[] newTile = new string[10];
-        for (int x = 0; x < 10; x++)
+        string[] newTile = new string[tileData.Length];
+        for (int x = 0; x < tileData.Length; x++)
         {
             string newRow = "";
-            for (int y = 9; y > -1; y--)
+            for (int y = tileData.Length - 1; y > -1; y--)
             {
                 newRow += tileData[y][x];
             }
@@ -236,9 +393,44 @@ class Day20
     private void printTile(string[] tileData)
     {
         Console.WriteLine("Printing tile from data");
-        for (int y = 0; y < 10; y++)
+        for (int y = 0; y < tileData.Length; y++)
         {
             Console.WriteLine(tileData[y]);
+        }
+    }
+
+    private void printArrangedTiles()
+    {
+        for (int y = 0; y < NUM_TILES_PER_SIDE; y++)
+        {
+            string[] fullRow = new string[10]; // all tiles are 10x10
+            for (int x = 0; x < NUM_TILES_PER_SIDE; x++)
+            {
+                if (x == 0)
+                {
+                    fullRow[y] = ""; // initialize
+                }
+                for (int i = 0; i < 10; i++)
+                {
+                    fullRow[i] += tiles[arrangedTiles[x, y]][i];
+                }
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                Console.WriteLine(fullRow[i]);
+            }
+        }
+    }
+
+    private void printGridOfArrangedTileNames()
+    {
+        for (int y = 0; y < NUM_TILES_PER_SIDE; y++)
+        {
+            for (int x = 0; x < NUM_TILES_PER_SIDE; x++)
+            {
+                Console.Write($"{arrangedTiles[x, y]}\t");
+            }
+            Console.WriteLine();
         }
     }
 }

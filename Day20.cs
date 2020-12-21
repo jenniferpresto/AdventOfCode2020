@@ -4,7 +4,7 @@ using System.Collections.Generic;
 class Day20
 {
     private List<string> data;
-    private const int NUM_TILES_PER_SIDE = 3;
+    private const int NUM_TILES_PER_SIDE = 12;
     Dictionary<int, string[]> tiles = new Dictionary<int, string[]>();
     List<int> listOfTileNames = new List<int>();
     int[,] arrangedTiles = new int[NUM_TILES_PER_SIDE, NUM_TILES_PER_SIDE]; // depends on size of data set (test data is 3x3, actual data is 12x12)
@@ -55,16 +55,16 @@ class Day20
         //
         // answer to part one
         //
-        long answerProduct = 1;
-        foreach (var total in totalSharedEdgesByTiles)
-        {
-            if (total.Value == 2)
-            {
-                long val = total.Key;
-                answerProduct *= val;
-            }
-        }
-        Console.WriteLine($"Answer: {answerProduct}");
+        // long answerProduct = 1;
+        // foreach (var total in totalSharedEdgesByTiles)
+        // {
+        //     if (total.Value == 2)
+        //     {
+        //         long val = total.Key;
+        //         answerProduct *= val;
+        //     }
+        // }
+        // Console.WriteLine($"Answer: {answerProduct}");
 
         //
         //  continuing for part two
@@ -81,11 +81,13 @@ class Day20
                 }
             }
         }
+
+        printListOfAllAdjacentTiles();
         //  testing
-        foreach (var adjTile in adjacentTiles[2473])
-        {
-            Console.WriteLine($"Piece 2473 adjacent to {adjTile}, share {getCommonEdges(2473, adjTile)} edges");
-        }
+        // foreach (var adjTile in adjacentTiles[2473])
+        // {
+        //     Console.WriteLine($"Piece 2473 adjacent to {adjTile}, share {getCommonEdges(2473, adjTile)} edges");
+        // }
     }
 
     private void assembleTilesInOrder()
@@ -98,16 +100,16 @@ class Day20
         }
         else
         {
-            // arrangedTiles[0, 0] = -1;
+            arrangedTiles[0, 0] = 1019;
         }
         for (int y = 0; y < NUM_TILES_PER_SIDE; y++)
         {
             int nextTile = 0;
             for (int x = 0; x < NUM_TILES_PER_SIDE - 1; x++)
             {
-                Console.WriteLine($"getting tile to the right of {x}, {y}, which is {arrangedTiles[x, y]}");
+                // Console.WriteLine($"getting tile to the right of {x}, {y}, which is {arrangedTiles[x, y]}");
                 nextTile = getTileToRightAndReorient(arrangedTiles[x, y]);
-                Console.WriteLine($"Assigning {nextTile} to space {x + 1}, {y}");
+                // Console.WriteLine($"Assigning {nextTile} to space {x + 1}, {y}");
                 arrangedTiles[x + 1, y] = nextTile;
             }
             if (y < NUM_TILES_PER_SIDE - 1)
@@ -122,12 +124,12 @@ class Day20
 
     private int getTileToRightAndReorient(int alreadyPlacedTileName)
     {
+        Console.WriteLine($"Getting tile to the right of {alreadyPlacedTileName}");
         string edgeConnectedToRightEdge = "";
         int tileOnRight = -1;
         //  get the correct tile from the possible connected ones
         foreach (var tileName in adjacentTiles[alreadyPlacedTileName])
         {
-            Console.WriteLine($"Adjacent to {tileName}");
             (string tile1Edge, string tile2Edge) connection = getCommonEdges(alreadyPlacedTileName, tileName);
             if (connection.tile1Edge == "right")
             {
@@ -136,18 +138,22 @@ class Day20
                 tileOnRight = tileName;
                 break;
             }
+            // else
+            // {
+            //     Console.WriteLine($"\tskipping tile {tileName} because not correct direction");
+            // }
         }
-
+        // Console.WriteLine($"Starting with this tile before reorienting {tileOnRight}");
+        // printTile(tileOnRight);
         //  reorient the tile that's being placed
-        //  certain a better way to do this, too
+        //  certainly a better way to do this, too
         string[] reorientedTile = new string[10];
         //  the rotation is counter-intuitive;
         //  actually changing the way the sides are labeled, not rotating the actual tile
         switch (edgeConnectedToRightEdge)
         {
             case "top":
-                reorientedTile = rotateTileClockwise(tileOnRight);
-                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = flipTileOverTB(tileOnRight);
                 reorientedTile = rotateTileClockwise(reorientedTile);
                 break;
             case "right":
@@ -162,8 +168,7 @@ class Day20
                 reorientedTile = tiles[tileOnRight];
                 break;
             case "-top":
-                reorientedTile = flipTileOverTB(tileOnRight);
-                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(tileOnRight);
                 reorientedTile = rotateTileClockwise(reorientedTile);
                 reorientedTile = rotateTileClockwise(reorientedTile);
                 break;
@@ -172,15 +177,34 @@ class Day20
                 reorientedTile = rotateTileClockwise(reorientedTile);
                 break;
             case "-bottom":
+                // Console.WriteLine("Doin' the -bottom flip!!!!!!!!!");
                 reorientedTile = flipTileOverTB(tileOnRight);
+                // Console.WriteLine("After flip");
+                // printTile(reorientedTile);
                 reorientedTile = rotateTileClockwise(reorientedTile);
+                // Console.WriteLine("After first rotation");
+                // printTile(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                // Console.WriteLine("After second rotation");
+                // printTile(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                // Console.WriteLine("After third rotation");
+                // printTile(reorientedTile);
                 break;
             case "-left":
                 reorientedTile = flipTileOverTB(tileOnRight);
                 break;
 
         }
+        Console.WriteLine($"Comparing to this tile: {alreadyPlacedTileName}");
+        printTile(alreadyPlacedTileName);
+        Console.WriteLine($"Reorienting {tileOnRight}; before");
+        printTile(tileOnRight);
         tiles[tileOnRight] = reorientedTile;
+        Console.WriteLine("after");
+        printTile(tiles[tileOnRight]);
+        printAdjancenciesForTile(tileOnRight);
+        // Console.ReadLine();
         return tileOnRight;
     }
 
@@ -191,7 +215,7 @@ class Day20
         //  get the correct tile from the possible connected ones
         foreach (var tileName in adjacentTiles[alreadyPlacedTileName])
         {
-            Console.WriteLine($"Adjacent to {tileName}");
+            // Console.WriteLine($"Adjacent to {tileName}");
             (string tile1Edge, string tile2Edge) connection = getCommonEdges(alreadyPlacedTileName, tileName);
             if (connection.tile1Edge == "bottom")
             {
@@ -214,6 +238,8 @@ class Day20
                 break;
             case "right":
                 reorientedTile = rotateTileClockwise(tileOnBottom);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
                 break;
             case "bottom":
                 reorientedTile = flipTileOverTB(tileOnBottom);
@@ -230,17 +256,15 @@ class Day20
             case "-right":
                 reorientedTile = flipTileOverTB(tileOnBottom);
                 reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(reorientedTile);
                 break;
             case "-bottom":
-                reorientedTile = flipTileOverTB(tileOnBottom);
-                reorientedTile = rotateTileClockwise(reorientedTile);
+                reorientedTile = rotateTileClockwise(tileOnBottom);
                 reorientedTile = rotateTileClockwise(reorientedTile);
                 break;
             case "-left":
                 reorientedTile = rotateTileClockwise(tileOnBottom);
-                reorientedTile = rotateTileClockwise(reorientedTile);
-                reorientedTile = rotateTileClockwise(reorientedTile);
-                reorientedTile = rotateTileClockwise(reorientedTile);
                 break;
 
         }
@@ -406,19 +430,24 @@ class Day20
             string[] fullRow = new string[10]; // all tiles are 10x10
             for (int x = 0; x < NUM_TILES_PER_SIDE; x++)
             {
-                if (x == 0)
-                {
-                    fullRow[y] = ""; // initialize
-                }
                 for (int i = 0; i < 10; i++)
                 {
-                    fullRow[i] += tiles[arrangedTiles[x, y]][i];
+                    if (x == 0)
+                    {
+                        fullRow[i] = ""; // initialize
+                    }
+                    fullRow[i] += tiles[arrangedTiles[x, y]][i] + "|";
                 }
             }
             for (int i = 0; i < 10; i++)
             {
                 Console.WriteLine(fullRow[i]);
             }
+            for (int i = 0; i < 10 * NUM_TILES_PER_SIDE + NUM_TILES_PER_SIDE; i++)
+            {
+                Console.Write("-");
+            }
+            Console.WriteLine();
         }
     }
 
@@ -432,5 +461,25 @@ class Day20
             }
             Console.WriteLine();
         }
+    }
+
+    private void printListOfAllAdjacentTiles()
+    {
+        //  print all adjancencies
+        foreach (var tile in adjacentTiles)
+        {
+            printAdjancenciesForTile(tile.Key);
+        }
+    }
+
+    private void printAdjancenciesForTile(int tileName)
+    {
+        Console.WriteLine($"Tile {tileName} adjacent to {adjacentTiles[tileName].Count} tiles");
+        for (int j = 0; j < adjacentTiles[tileName].Count; j++)
+        {
+            (string, string) directions = getCommonEdges(tileName, adjacentTiles[tileName][j]);
+            Console.WriteLine($"\t{adjacentTiles[tileName][j]}; tile above's {directions.Item1}, this tile's {directions.Item2}");
+        }
+
     }
 }

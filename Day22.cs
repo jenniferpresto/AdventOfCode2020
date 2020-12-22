@@ -9,9 +9,13 @@ class Day22
     List<(Queue<int>, Queue<int>)> activeGameHistory = new List<(Queue<int>, Queue<int>)>();
     Stack<(Queue<int> priorDeck1, Queue<int> priorDeck2)> gameStack = new Stack<(Queue<int> priorDeck1, Queue<int> priorDeck2)>();
     Stack<(int lastCard1, int lastCard2)> lastCardsOnTableStack = new Stack<(int lastCard1, int lastCard2)>();
-    Stack<int> lastCard1Stack = new Stack<int>();
-    Stack<int> lastCard2Stack = new Stack<int>();
+    // Stack<int> lastCard1Stack = new Stack<int>();
+    // Stack<int> lastCard2Stack = new Stack<int>();
     Stack<List<(Queue<int>, Queue<int>)>> historyStack = new Stack<List<(Queue<int>, Queue<int>)>>();
+
+    Stack<List<Queue<int>>> player1HistoryStack = new Stack<List<Queue<int>>>();
+
+    long NUM_ROUNDS = 0;
 
     public Day22(List<string> dataList)
     {
@@ -57,32 +61,143 @@ class Day22
 
     private void playTheSecondGame()
     {
-        // Queue<int> deck1Snapshot = new Queue<int>(deck1);
-        // Queue<int> deck2Snapshot = new Queue<int>(deck2);
-        // currentHistory.Add((deck1Snapshot, deck2Snapshot));
-        int winner = playARecursiveGame(deck1, deck2);
-        // // Console.WriteLine($"Winner is {winner}");
-        printDeck("1", deck1);
-        printDeck("2", deck2);
+
+        //  start off by making copies of the decks
+        Queue<int> activeDeck1 = new Queue<int>(deck1);
+        Queue<int> activeDeck2 = new Queue<int>(deck2);
+
+        // int winner = playARecursiveGame(deck1, deck2);
+
+        // Console.WriteLine($"Winner is {winner}");
+        // printDeck("1", deck1);
+        // printDeck("2", deck2);
+        // if (winner == 1)
+        // {
+        //     scoreTheGame(deck1);
+        // }
+        // else if (winner == 2)
+        // {
+        //     scoreTheGame(deck2);
+        // }
+        // return;
+
+        int counter = 1;
+        Console.WriteLine($"Round {counter} through loop");
+        printDeck("1", activeDeck1);
+        printDeck("2", activeDeck2);
+        int winner = -1;
+        while (counter < 5000)
+        {
+
+
+            int card1 = activeDeck1.Peek();
+            int card2 = activeDeck2.Peek();
+
+            bool roundComplete = playRecursiveRound(activeDeck1, activeDeck2);
+            if (!roundComplete)
+            {
+                Console.WriteLine("Creating a subgame");
+                Queue<int> savedDeck1ForLater = new Queue<int>(activeDeck1);
+                Queue<int> savedDeck2ForLater = new Queue<int>(activeDeck2);
+                Queue<int> deck1ForSubGame = getDeckForSubgame(card1, activeDeck1);
+                Queue<int> deck2ForSubGame = getDeckForSubgame(card2, activeDeck2);
+                gameStack.Push((savedDeck1ForLater, savedDeck2ForLater));
+                lastCardsOnTableStack.Push((card1, card2));
+
+                activeDeck1.Clear();
+                activeDeck2.Clear();
+                activeDeck1 = null;
+                activeDeck2 = null;
+
+                activeDeck1 = deck1ForSubGame;
+                activeDeck2 = deck2ForSubGame;
+            }
+            //  normal round
+            else
+            {
+                if (activeDeck1.Count < 1 || activeDeck2.Count < 1)
+                {
+                    Console.WriteLine("We have a winner of a game");
+                    winner = activeDeck1.Count > 0 ? 1 : 2;
+                    if (gameStack.Count == 0)
+                    {
+                        Console.WriteLine("This was the top-level game");
+                        printDeck("1", activeDeck1);
+                        printDeck("2", activeDeck2);
+                        break;
+                    }
+                    activeDeck1.Clear();
+                    activeDeck2.Clear();
+                    activeDeck1 = null;
+                    activeDeck2 = null;
+                    (Queue<int> deck1, Queue<int> deck2) gameToResume = gameStack.Pop();
+                    (int lastCard1, int lastCard2) = lastCardsOnTableStack.Pop();
+                    activeDeck1 = gameToResume.deck1;
+                    activeDeck2 = gameToResume.deck2;
+                    if (winner == 1)
+                    {
+                        activeDeck1.Enqueue(lastCard1);
+                        activeDeck1.Enqueue(lastCard2);
+                    }
+                    else
+                    {
+                        activeDeck2.Enqueue(lastCard2);
+                        activeDeck2.Enqueue(lastCard1);
+                    }
+                }
+            }
+            counter++;
+            Console.WriteLine($"Round {counter} through loop");
+            printDeck("1", activeDeck1);
+            printDeck("2", activeDeck2);
+        }
+
+
+        //  print the results
+        Console.WriteLine($"Winner is {winner}");
+        printDeck("1", activeDeck1);
+        printDeck("2", activeDeck2);
         if (winner == 1)
         {
-            scoreTheGame(deck1);
+            scoreTheGame(activeDeck1);
         }
         else if (winner == 2)
         {
-            scoreTheGame(deck2);
-
+            scoreTheGame(activeDeck2);
         }
+    }
+
+    private bool playRecursiveRound(Queue<int> activeDeck1, Queue<int> activeDeck2)
+    {
+        int card1 = activeDeck1.Dequeue();
+        int card2 = activeDeck2.Dequeue();
+
+        //  we have to create a subgame
+        if (activeDeck1.Count >= card1 && activeDeck2.Count >= card2)
+        {
+            //  make a copy of the game, drawn cards, history
+            // Queue<int> deck1ForSubGame = getDeckForSubgame(card1, activeDeck1);
+            // Queue<int> deck2ForSubGame = getDeckForSubgame(card2, activeDeck2);
+            // gameStack.Push((activeDeck1, activeDeck2));
+            // lastCardsOnTableStack.Push((card1, card2));
+            // lastCard1Stack.Push(card1);
+            // lastCard2Stack.Push(card2);
+            // List<(Queue<int>, Queue<int>)> savedHistory = new List<(Queue<int>, Queue<int>)>(activeGameHistory);
+            // historyStack.Push(savedHistory);
+            // activeGameHistory.Clear();
+            return false;
+        }
+
+        //  otherwise, just keep playing
+        playARegularRound(activeDeck1, activeDeck2, card1, card2);
+        return true;
     }
 
     //  returns the winner of the game
     private int playARecursiveGame(Queue<int> activeDeck1, Queue<int> activeDeck2)
     {
-        Console.WriteLine("Garbage collecting");
-        GC.Collect();
-        Console.WriteLine("Waiting");
-        GC.WaitForPendingFinalizers();
-        // Console.WriteLine($"Stack is {gameStack.Count}");
+        Console.WriteLine(NUM_ROUNDS);
+        NUM_ROUNDS++;
         //  check for infinite loop
         bool foundSame = false;
         for (int i = 0; i < activeGameHistory.Count; i++)
@@ -103,6 +218,8 @@ class Day22
                 // // Console.WriteLine("Going one game up after near-brush with infinity");
                 (Queue<int> deck1, Queue<int> deck2) priorGame = gameStack.Pop();
                 (int lastCard1, int lastCard2) lastCards = lastCardsOnTableStack.Pop();
+                // int lastCard1 = lastCard1Stack.Pop();
+                // int lastCard2 = lastCard2Stack.Pop();
                 activeGameHistory.Clear();
                 activeGameHistory = null;
                 activeGameHistory = historyStack.Pop();
@@ -138,12 +255,7 @@ class Day22
             // // Console.WriteLine($"Length of current history: {activeGameHistory.Count}");
 
         }
-        // if (currentHistory.Contains((activeDeck1, activeDeck2)))
-        // {
-        //     //  player 1 wins
-        //     // // Console.WriteLine("Player one wins this game");
-        //     return 1;
-        // }
+
         int card1 = activeDeck1.Dequeue();
         int card2 = activeDeck2.Dequeue();
         if (activeDeck1.Count >= card1 && activeDeck2.Count >= card2)
@@ -153,6 +265,8 @@ class Day22
             Queue<int> deck2ForSubGame = getDeckForSubgame(card2, activeDeck2);
             gameStack.Push((activeDeck1, activeDeck2));
             lastCardsOnTableStack.Push((card1, card2));
+            // lastCard1Stack.Push(card1);
+            // lastCard2Stack.Push(card2);
             List<(Queue<int>, Queue<int>)> savedHistory = new List<(Queue<int>, Queue<int>)>(activeGameHistory);
             historyStack.Push(savedHistory);
             activeGameHistory.Clear();
@@ -176,9 +290,12 @@ class Day22
                 {
                     (Queue<int> deck1, Queue<int> deck2) priorGame = gameStack.Pop();
                     (int lastCard1, int lastCard2) lastCards = lastCardsOnTableStack.Pop();
+                    // int lastCard1 = lastCard1Stack.Pop();
+                    // int lastCard2 = lastCard2Stack.Pop();
                     activeGameHistory.Clear();
                     activeGameHistory = null;
                     activeGameHistory = historyStack.Pop();
+
                     // // Console.WriteLine("Winner from regular round! Going one game up...");
                     // // Console.WriteLine($"Prior game count: {priorGame.deck1.Count} cards vs {priorGame.deck2.Count}; after a normal round, stacks are now: game {gameStack.Count}, last cards {lastCardsOnTableStack.Count}, history {historyStack.Count}; new history list has {activeGameHistory.Count} entries");
                     // printDeck("Prior 1", priorGame.deck1);
@@ -236,10 +353,6 @@ class Day22
         {
             deck2.Enqueue(card2);
             deck2.Enqueue(card1);
-        }
-        else
-        {
-            // // Console.WriteLine("Tie");
         }
     }
 
@@ -311,7 +424,7 @@ class Day22
     }
     private void printDeck(string name, Queue<int> deck)
     {
-        // Console.Write($"Deck {name}: ");
+        Console.Write($"Deck {name}: ");
         Queue<int> deckCopy = new Queue<int>(deck);
         while (deckCopy.Count > 0)
         {

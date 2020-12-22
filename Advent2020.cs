@@ -84,9 +84,17 @@ namespace AdventCode
             // var day19 = new Day19(data19);
             // day19.calculate();
 
-            List<string> data20 = ReadStringData("./data/adventData_20.txt");
-            var day20 = new Day20(data20);
-            day20.calculate();
+            // List<string> data20 = ReadStringData("./data/adventData_20.txt");
+            // var day20 = new Day20(data20);
+            // day20.calculate();
+
+            // List<string> data21 = ReadStringData("./data/adventData_21.txt");
+            // var day21 = new Day21(data21);
+            // day21.calculate();
+
+            List<string> data22 = ReadStringData("./data/adventData_22_test.txt");
+            var day22 = new Day22(data22);
+            day22.calculate();
 
 
             Console.WriteLine("\nDone");

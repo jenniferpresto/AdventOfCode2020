@@ -92,7 +92,7 @@ namespace AdventCode
             // var day21 = new Day21(data21);
             // day21.calculate();
 
-            List<string> data22 = ReadStringData("./data/adventData_22_test.txt");
+            List<string> data22 = ReadStringData("./data/adventData_22.txt");
             var day22 = new Day22(data22);
             day22.calculate();
 

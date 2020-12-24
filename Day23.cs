@@ -6,9 +6,9 @@ class Day23
 {
 
     //  952316487
-    // int[] data1 = { 9, 5, 2, 3, 1, 6, 4, 8, 7 }; // my data
+    int[] data1 = { 9, 5, 2, 3, 1, 6, 4, 8, 7 }; // my data
 
-    int[] data1 = { 3, 8, 9, 1, 2, 5, 4, 6, 7 }; // test data
+    // int[] data1 = { 3, 8, 9, 1, 2, 5, 4, 6, 7 }; // test data
     int[] data2 = new int[9];
 
     int[] currentArray = new int[9];
@@ -26,21 +26,10 @@ class Day23
     {
         currentCupValue = data1[0];
         Console.WriteLine("Hello, welcome to Day 23");
-        // doOneHundredMoves();
-        doTenMillionMoves();
+        playTheGame();
     }
 
-    private void doOneHundredMoves()
-    {
-        for (int i = 0; i < 100; i++)
-        {
-            doAMove();
-        }
-        rearrangeForTargetCupOnLeft(1);
-        printArray("Final answer:", data1);
-    }
-
-    private void doTenMillionMoves()
+    private void playTheGame()
     {
         int NUM_CUPS = 9;
         int NUM_MOVES = 100;
@@ -77,11 +66,12 @@ class Day23
         // File.AppendAllText(logFile, DateTime.Now.ToString());
         for (int i = 0; i < NUM_MOVES; i++)
         {
-            Console.WriteLine($"Move {i + 1}------");
+            if (i % 2000 == 0)
+            {
+                Console.WriteLine($"Move {i + 1}------");
+            }
             // File.AppendAllText(logFile, "Move " + (i + 1).ToString() + "-------\n");
             doAMove();
-            // rearrangeForTargetCupOnLeft(1);
-            // printArrayHead("rearranged for 1", data);
         }
         Console.WriteLine(DateTime.Now);
         // File.AppendAllText(logFile, DateTime.Now.ToString());
@@ -89,7 +79,7 @@ class Day23
         int limit = Math.Min(data1.Length, 20);
         for (int i = 0; i < limit; i++)
         {
-            Console.Write($"{data1[i]}, ");
+            Console.Write($"{currentArray[i]}, ");
         }
         Console.WriteLine();
         Console.WriteLine(DateTime.Now);
@@ -98,10 +88,10 @@ class Day23
 
     private void doAMove()
     {
-        //  find current cup
+        //  put current cup in left-most position
         rearrangeForTargetCupOnLeft(currentCupValue);
         //  make a copy of the data
-        currentArray.CopyTo(targetArray, 0);
+        Buffer.BlockCopy(currentArray, 0, targetArray, 0, currentArray.Length * INT_SIZE);
         int destValue = currentCupValue - 1;
         //  find destination cup
         while (true)
@@ -125,31 +115,18 @@ class Day23
 
             }
         }
-        printArray("data after rearranging (starting with this)", currentArray);
-        //  find where the destination cup is
+        // printArray("data after rearranging (starting with this)", currentArray);
+        //  find where the destination cup is in the array
         int destIndex = Array.IndexOf(currentArray, destValue);
-        // Console.WriteLine($"Destination value: {destValue}, index: {destIndex}");
 
         //  put the cups back down up to and including the destination index
-        for (int i = 4; i < destIndex + 1; i++)
-        {
-            // Console.WriteLine($"First, place {data[i]} at tempData spot {i - 3}");
-            targetArray[i - 3] = currentArray[i];
-        }
+        Buffer.BlockCopy(currentArray, 4 * INT_SIZE, targetArray, INT_SIZE, (destIndex - 3) * INT_SIZE);
         //  place the three cups
         for (int i = 1; i < 4; i++)
         {
-            // Console.WriteLine($"Second, place {data[i]} at tempData spot {destIndex - 3 + i}");
             targetArray[destIndex - 3 + i] = currentArray[i];
         }
-        // place the remaining cups, which will be the same
-        // Buffer.BlockCopy(currentArray, (destIndex + 1) * INT_SIZE, targetArray, (destIndex + 1) * INT_SIZE, (currentArray.Length - destIndex - 1) * INT_SIZE);
-        for (int i = destIndex + 1; i < currentArray.Length; i++)
-        {
-            // Console.WriteLine($"Finall, place {data[i]} at tempData spot {i}");
-            targetArray[i] = currentArray[i];
-        }
-        //  copy our data back to the main array
+        // remaining cups are all the same
 
         //  switch the arrays
         if (currentArray == data1)
@@ -163,11 +140,8 @@ class Day23
             targetArray = data2;
         }
 
-
-
-        // data2.CopyTo(data1, 0);
         currentCupValue = currentArray[1];
-        printArray("data after move", currentArray);
+        // printArray("data after move", currentArray);
     }
 
     private void rearrangeForTargetCupOnLeft(int targetCupVal)

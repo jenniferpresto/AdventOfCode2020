@@ -15,7 +15,7 @@ class Day22
 
     Stack<List<Queue<int>>> player1HistoryStack = new Stack<List<Queue<int>>>();
 
-    long NUM_ROUNDS = 0;
+    // long NUM_ROUNDS = 0;
 
     public Day22(List<string> dataList)
     {

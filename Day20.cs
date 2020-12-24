@@ -130,14 +130,14 @@ class Day20
     {
         //  pick one of the tiles to be the top right corner (can be any corner; picked one from looking at data that didn't need to be reoriented)
         //  yes, you could write a function to do this
-        if (NUM_TILES_PER_SIDE == 3)
-        {
-            arrangedTiles[0, 0] = 2971;
-        }
-        else
-        {
+        // if (NUM_TILES_PER_SIDE == 3)
+        // {
+        //     arrangedTiles[0, 0] = 2971;
+        // }
+        // else
+        // {
             arrangedTiles[0, 0] = 1019;
-        }
+        // }
         for (int y = 0; y < NUM_TILES_PER_SIDE; y++)
         {
             int nextTile = 0;

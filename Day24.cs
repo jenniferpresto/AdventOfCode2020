@@ -55,11 +55,17 @@ class Day24
         Dictionary<(int x, int y), bool> tempTiles = new Dictionary<(int x, int y), bool>(tiles);
         foreach (var tile in tiles)
         {
+            //  don't need to fill in the missing tiles around a white tile
+            if (!tile.Value) continue;
+            //  but we do fill in missing tiles around black tiles
             (int x, int y) tileLoc = tile.Key;
             for (int y = -1; y < 2; y++)
             {
                 for (int x = -1; x < 2; x++)
                 {
+                    if (y == -1 && x == -1) { continue; }
+                    if (y == 1 && x == 1) { continue; }
+                    if (y == 0 && x == 0) { continue; }
                     if (!tempTiles.ContainsKey((tileLoc.x + x, tileLoc.y + y)))
                     {
                         tempTiles.Add((tileLoc.x + x, tileLoc.y + y), false);
@@ -107,6 +113,11 @@ class Day24
                 if (numAdjacentBlackTiles == 2)
                 {
                     tempTiles[tileLoc] = true;
+                }
+                //  we can remove a white tile completely surrounded by other white tiles
+                else if (numAdjacentBlackTiles == 0)
+                {
+                    tempTiles.Remove(tileLoc);
                 }
             }
         }

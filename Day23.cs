@@ -16,7 +16,7 @@ class Day23
 
     const int INT_SIZE = 4;
 
-    string logFile = "./log.txt";
+    // string logFile = "./log.txt";
     int currentCupValue = 0;
     public Day23()
     {

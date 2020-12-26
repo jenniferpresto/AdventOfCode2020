@@ -1,190 +1,206 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 
-class Day23
+class Day99
 {
+    string data = "952316487"; // my data
+    // string data = "389125467"; // test data
+    CircularLinkedList cupCircle = new CircularLinkedList();
+    const int NUM_CUPS = 1000000;
+    const int NUM_MOVES = 10000000;
 
-    //  952316487
-    int[] data1 = { 9, 5, 2, 3, 1, 6, 4, 8, 7 }; // my data
-
-    // int[] data1 = { 3, 8, 9, 1, 2, 5, 4, 6, 7 }; // test data
-    int[] data2 = new int[9];
-
-    int[] currentArray = new int[9];
-    int[] targetArray = new int[9];
-
-    const int INT_SIZE = 4;
-
-    // string logFile = "./log.txt";
-    int currentCupValue = 0;
-    public Day23()
-    {
-    }
+    Dictionary<int, Node> allCupsDictionary = new Dictionary<int, Node>();
 
     public void calculate()
     {
-        currentCupValue = data1[0];
-        Console.WriteLine("Hello, welcome to Day 23");
-        playTheGame();
-    }
-
-    private void playTheGame()
-    {
-        int NUM_CUPS = 9;
-        int NUM_MOVES = 100;
-        //  populate new array
-        int[] allTheCups = new int[NUM_CUPS];
-        int newCupVal = data1.Length + 1; // assuming all sequential numbers are included in original (they are)
-        for (int i = 0; i < data1.Length; i++)
+        foreach (char c in data)
         {
-            allTheCups[i] = data1[i];
-        }
-        for (int i = data1.Length; i < allTheCups.Length; i++)
-        {
-            allTheCups[i] = newCupVal;
-            newCupVal++;
+            int value = int.Parse(c.ToString());
+            Node n = cupCircle.addNewNodeAfterCurrentAndMoveCurrent(value);
+            allCupsDictionary.Add(value, n);
         }
 
-        //  substitute new array for data
-        data1 = null;
-        data1 = allTheCups;
-        data2 = null;
-        data2 = new int[NUM_CUPS];
+        if (NUM_CUPS > data.Length)
+        {
+            for (int i = data.Length; i < NUM_CUPS; i++)
+            {
+                Node n = cupCircle.addNewNodeAfterCurrentAndMoveCurrent(i + 1);
+                allCupsDictionary.Add(i + 1, n);
+            }
+        }
 
-        //  data1 and data2 should be the same
-        data1.CopyTo(data2, 0);
+        int firstCup = int.Parse(data[0].ToString());
+        cupCircle.current = allCupsDictionary[firstCup];
+        cupCircle.printFirstTwentyNodes();
 
-        //  currentArray and targetArray will flip back and forth as to which ones they're referencing
-        currentArray = null;
-        targetArray = null;
-        currentArray = data1;
-        targetArray = data2;
-
-        //  then do the same as before
         Console.WriteLine(DateTime.Now);
-        // File.AppendAllText(logFile, DateTime.Now.ToString());
         for (int i = 0; i < NUM_MOVES; i++)
         {
-            if (i % 2000 == 0)
-            {
-                Console.WriteLine($"Move {i + 1}------");
-            }
-            // File.AppendAllText(logFile, "Move " + (i + 1).ToString() + "-------\n");
             doAMove();
         }
+        cupCircle.current = allCupsDictionary[1];
+        Console.WriteLine("First twenty Final cups");
+        cupCircle.printFirstTwentyNodes();
+        long firstCupValue = allCupsDictionary[1].next.value;
+        long secondCupValue = allCupsDictionary[Convert.ToInt32(firstCupValue)].next.value;
+        Console.WriteLine($"Product of first two cups: {firstCupValue * secondCupValue}");
         Console.WriteLine(DateTime.Now);
-        // File.AppendAllText(logFile, DateTime.Now.ToString());
-        rearrangeForTargetCupOnLeft(1);
-        int limit = Math.Min(data1.Length, 20);
-        for (int i = 0; i < limit; i++)
-        {
-            Console.Write($"{currentArray[i]}, ");
-        }
-        Console.WriteLine();
-        Console.WriteLine(DateTime.Now);
-
     }
 
-    private void doAMove()
+    public void doAMove()
     {
-        //  put current cup in left-most position
-        rearrangeForTargetCupOnLeft(currentCupValue);
-        //  make a copy of the data
-        Buffer.BlockCopy(currentArray, 0, targetArray, 0, currentArray.Length * INT_SIZE);
-        int destValue = currentCupValue - 1;
-        //  find destination cup
+        //  next three cups
+        Node cup1 = cupCircle.current.next;
+        Node cup2 = cup1.next;
+        Node cup3 = cup2.next;
+
+        //  get destination value
+        int destValue = cupCircle.current.value - 1;
+
+        //  get value of what will be the next current cup
+        //  then link current cup to that one
+        int nextCurrentCupValue = cup3.next.value;
+        cupCircle.current.next = cup3.next;
+
+        for (int i = 0; i < 3; i++)
+        {
+            bool foundCup = true;
+            if (destValue < 1)
+            {
+                destValue += NUM_CUPS;
+            }
+
+            if (destValue == cup1.value || destValue == cup2.value || destValue == cup3.value)
+            {
+                destValue--;
+                foundCup = false;
+            }
+            if (foundCup) { break; }
+        }
+
+        //  insert the cups
+        //  setting the current value here prevents iteration through potentially 999,999 cups
+        cupCircle.current = allCupsDictionary[destValue];
+        cupCircle.insertThreeCupsAfterDestinationCup(cup1, cup2, cup3, destValue);
+
+        //  then use dictionary to set current one back to value saved at beginning of method
+        cupCircle.current = allCupsDictionary[nextCurrentCupValue];
+    }
+}
+
+class CircularLinkedList
+{
+    public Node current;
+    public CircularLinkedList()
+    {
+        current = null;
+    }
+
+    public Node addNewNodeAfterCurrentAndMoveCurrent(int value)
+    {
+        Node n = new Node(value);
+        //  empty list
+        if (current == null)
+        {
+            current = n;
+        }
+        //  one node in list
+        else if (current.next == null)
+        {
+            current.next = n;
+            n.next = current;
+            current = n;
+        }
+        //  more items in list
+        else
+        {
+            n.next = current.next;
+            current.next = n;
+            current = n;
+        }
+
+        return n;
+    }
+
+    public void iterateCurrentByOne()
+    {
+        this.current = this.current.next;
+    }
+
+    public void setCurrentNodeToValue(int v)
+    {
+        if (this.current.value == v)
+        {
+            Console.WriteLine("We're already there");
+            return;
+        }
+
+        //  NB: Potentially very lengthy process
+        while (this.current.value != v)
+        {
+            current = current.next;
+        }
+    }
+
+    public void insertThreeCupsAfterDestinationCup(Node cup1, Node cup2, Node cup3, int value)
+    {
+        Node n = this.current;
+        //  NB: if current value not set beforehand, this is potentially lengthy process
         while (true)
         {
-            bool foundDest = true;
-            //  try subtracting one (loop around if go below 1)
-            destValue = destValue < 1 ? destValue + data1.Length : destValue;
-            //  check against three cups just lifted
-            for (int i = 1; i < 4; i++)
+            if (n.value == value)
             {
-                if (data1[i] == destValue)
-                {
-                    destValue--;
-                    foundDest = false;
-                    break;
-                }
-            }
-            if (foundDest)
-            {
+                cup3.next = n.next;
+                n.next = cup1;
                 break;
 
             }
-        }
-        // printArray("data after rearranging (starting with this)", currentArray);
-        //  find where the destination cup is in the array
-        int destIndex = Array.IndexOf(currentArray, destValue);
-
-        //  put the cups back down up to and including the destination index
-        Buffer.BlockCopy(currentArray, 4 * INT_SIZE, targetArray, INT_SIZE, (destIndex - 3) * INT_SIZE);
-        //  place the three cups
-        for (int i = 1; i < 4; i++)
-        {
-            targetArray[destIndex - 3 + i] = currentArray[i];
-        }
-        // remaining cups are all the same
-
-        //  switch the arrays
-        if (currentArray == data1)
-        {
-            currentArray = data2;
-            targetArray = data1;
-        }
-        else
-        {
-            currentArray = data1;
-            targetArray = data2;
-        }
-
-        currentCupValue = currentArray[1];
-        // printArray("data after move", currentArray);
-    }
-
-    private void rearrangeForTargetCupOnLeft(int targetCupVal)
-    {
-        int targetCupPos = Array.IndexOf(currentArray, targetCupVal);
-        int lengthToEnd = currentArray.Length - targetCupPos;
-        //  rearrange so current cup is at the left
-        Buffer.BlockCopy(currentArray, targetCupPos * INT_SIZE, targetArray, 0, lengthToEnd * INT_SIZE);
-        Buffer.BlockCopy(currentArray, 0, targetArray, lengthToEnd * INT_SIZE, (currentArray.Length - lengthToEnd) * INT_SIZE);
-        if (currentArray == data1)
-        {
-            currentArray = data2;
-            targetArray = data1;
-        }
-        else
-        {
-            currentArray = data1;
-            targetArray = data2;
+            n = n.next;
         }
     }
-
-    private void printArray(string name, int[] array)
+    public void printFullList()
     {
-        // string stringText = "";
-        Console.WriteLine(name);
-        foreach (var val in array)
+        if (current == null)
         {
-            Console.Write($"{val} ");
-            // stringText += val.ToString() + " ";
+            Console.WriteLine("The list is empty");
+            return;
+        }
+        Node n = current;
+        Console.Write($"{current.value},");
+        current = current.next;
+        while (current != n)
+        {
+            Console.Write($"{current.value},");
+            current = current.next;
         }
         Console.WriteLine();
-        // File.AppendAllText(logFile, name + "\n");
-        // File.AppendAllText(logFile, stringText + "\n");
     }
 
-    private void printArrayHead(string name, int[] array)
+    public void printFirstTwentyNodes()
     {
-        int limit = Math.Min(20, array.Length);
-        Console.WriteLine(name);
-        for (int i = 0; i < limit; i++)
+        Node n = current;
+        for (int i = 0; i < 20; i++)
         {
-            Console.Write($"{array[i]}, ");
+            if (current == null)
+            {
+                Console.WriteLine("Empty list");
+                return;
+            }
+            Console.Write($"{n.value},");
+            n = n.next;
+            if (n == current) break;
         }
         Console.WriteLine();
+    }
+}
+
+public class Node
+{
+    public readonly int value;
+    public Node next;
+    public Node(int v)
+    {
+        this.value = v;
+        this.next = null;
     }
 }

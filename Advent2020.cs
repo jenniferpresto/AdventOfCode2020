@@ -96,15 +96,15 @@ namespace AdventCode
             // var day22 = new Day22(data22);
             // day22.calculate();
 
-            // var day23 = new Day23();
-            // day923.calculate();
+            var day23 = new Day99();
+            day23.calculate();
 
             // List<string> data24 = ReadStringData("./data/adventData_24.txt");
             // var day24 = new Day24(data24);
             // day24.calculate();
 
-            var day25 = new Day25();
-            day25.calculate();
+            // var day25 = new Day25();
+            // day25.calculate();
 
 
             Console.WriteLine("\nDone");

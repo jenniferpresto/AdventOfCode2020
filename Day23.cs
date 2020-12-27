@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-class Day99
+class Day23
 {
     string data = "952316487"; // my data
     // string data = "389125467"; // test data

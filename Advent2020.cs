@@ -80,9 +80,9 @@ namespace AdventCode
             // var day18 = new Day18(data18);
             // day18.calculate();
 
-            // List<string> data19 = ReadStringData("./data/adventData_19_test.txt");
-            // var day19 = new Day19(data19);
-            // day19.calculate();
+            List<string> data19 = ReadStringData("./data/adventData_19.txt");
+            var day19 = new Day19(data19);
+            day19.calculate();
 
             // List<string> data20 = ReadStringData("./data/adventData_20.txt");
             // var day20 = new Day20(data20);
@@ -96,8 +96,8 @@ namespace AdventCode
             // var day22 = new Day22(data22);
             // day22.calculate();
 
-            var day23 = new Day99();
-            day23.calculate();
+            // var day23 = new Day23();
+            // day23.calculate();
 
             // List<string> data24 = ReadStringData("./data/adventData_24.txt");
             // var day24 = new Day24(data24);

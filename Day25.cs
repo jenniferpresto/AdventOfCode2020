@@ -10,7 +10,6 @@ class Day25
     //  test data
     // const double doorPubKey = 17807724;
     // const double cardPubKey = 5764801;
-    double initialSubjectNum = 7;
 
     double doorLoopSize = 0;
     double cardLoopSize = 0;
